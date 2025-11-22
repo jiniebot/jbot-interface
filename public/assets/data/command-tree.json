@@ -1,0 +1,2151 @@
+{
+  "metadata": {
+    "generatedAt": "2025-11-22T00:44:09.753Z",
+    "totalCommands": 16,
+    "generator": "generate-command-tree.js",
+    "statistics": {
+      "totalSubcommandGroups": 28,
+      "totalSubcommands": 129,
+      "totalOptions": 166
+    }
+  },
+  "commands": [
+    {
+      "name": "admin",
+      "description": "Admin commands",
+      "deleted": false,
+      "subcommandGroups": [
+        {
+          "name": "add",
+          "description": "Add commands",
+          "subcommands": [
+            {
+              "name": "circular-zone",
+              "description": "Add a circular zone, will log to the Player Locations feed by default.",
+              "options": [
+                {
+                  "name": "name",
+                  "type": "String",
+                  "description": "name of the zone",
+                  "required": true
+                },
+                {
+                  "name": "x",
+                  "type": "Number",
+                  "description": "X coordinate of the monitor zone",
+                  "required": true
+                },
+                {
+                  "name": "y",
+                  "type": "Number",
+                  "description": "Y coordinate of the monitor zone",
+                  "required": true
+                },
+                {
+                  "name": "z",
+                  "type": "Number",
+                  "description": "Z coordinate of the monitor zone",
+                  "required": true
+                },
+                {
+                  "name": "range",
+                  "type": "Number",
+                  "description": "Monitoring range in units",
+                  "required": true
+                },
+                {
+                  "name": "owner",
+                  "type": "User",
+                  "description": "who is the zone for",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "polygonal-zone",
+              "description": "Add a polygonal Radar zone, will log to the Player Locations feed",
+              "options": [
+                {
+                  "name": "name",
+                  "type": "String",
+                  "description": "Name of the zone",
+                  "required": true
+                },
+                {
+                  "name": "owner",
+                  "type": "User",
+                  "description": "Who is the zone for",
+                  "required": true
+                },
+                {
+                  "name": "num_points",
+                  "type": "Integer",
+                  "description": "Number of points for the polygon (max 20)",
+                  "required": true,
+                  "minValue": 3,
+                  "maxValue": 20
+                }
+              ]
+            },
+            {
+              "name": "json",
+              "description": "Upload JSON files and add them to the object spawner array in cfggameplay.",
+              "options": [
+                {
+                  "name": "file",
+                  "type": "Attachment",
+                  "description": "JSON file to upload, provide no file to list existing files",
+                  "required": false
+                },
+                {
+                  "name": "keyword",
+                  "type": "String",
+                  "description": "Optional keyword to filter files in the directory",
+                  "required": false
+                }
+              ]
+            },
+            {
+              "name": "objspawner",
+              "description": "Move a JSON file from the Templates into the map for a specific player.",
+              "options": [
+                {
+                  "name": "file",
+                  "type": "String",
+                  "description": "which file, no extension",
+                  "required": true
+                },
+                {
+                  "name": "x",
+                  "type": "Number",
+                  "description": "x pos",
+                  "required": true
+                },
+                {
+                  "name": "y",
+                  "type": "Number",
+                  "description": "y pos",
+                  "required": true
+                },
+                {
+                  "name": "z",
+                  "type": "Number",
+                  "description": "z pos",
+                  "required": true
+                },
+                {
+                  "name": "compass-heading",
+                  "type": "Number",
+                  "description": "compass heading",
+                  "required": true
+                },
+                {
+                  "name": "addtocfg",
+                  "type": "Boolean",
+                  "description": "addtocfg",
+                  "required": true
+                },
+                {
+                  "name": "who",
+                  "type": "User",
+                  "description": "addtocfg",
+                  "required": false
+                }
+              ]
+            },
+            {
+              "name": "bounty",
+              "description": "Add a bounty.",
+              "options": [
+                {
+                  "name": "user",
+                  "type": "User",
+                  "description": "User to assign the bounty to",
+                  "required": false
+                },
+                {
+                  "name": "gamertag",
+                  "type": "String",
+                  "description": "Gamertag to assign the bounty to (if user is not provided)",
+                  "required": false
+                },
+                {
+                  "name": "amount",
+                  "type": "Number",
+                  "description": "Amount of money for the bounty",
+                  "required": false,
+                  "minValue": 1
+                },
+                {
+                  "name": "duration",
+                  "type": "Number",
+                  "description": "Duration in minutes for the bounty to be active (default 60)",
+                  "required": false
+                }
+              ]
+            },
+            {
+              "name": "pra",
+              "description": "Add PRA (Player Restricted Area) files to the server",
+              "options": [
+                {
+                  "name": "file",
+                  "type": "Attachment",
+                  "description": "The PRA JSON file to upload",
+                  "required": false
+                },
+                {
+                  "name": "keyword",
+                  "type": "String",
+                  "description": "Keyword to filter files by",
+                  "required": false
+                }
+              ]
+            },
+            {
+              "name": "spawngear",
+              "description": "Add spawn gear preset files to the server",
+              "options": [
+                {
+                  "name": "file",
+                  "type": "Attachment",
+                  "description": "The spawn gear preset JSON file to upload",
+                  "required": false
+                },
+                {
+                  "name": "keyword",
+                  "type": "String",
+                  "description": "Keyword to filter files by",
+                  "required": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "edit",
+          "description": "Edit commands",
+          "subcommands": [
+            {
+              "name": "options",
+              "description": "Edit the Global Options",
+              "options": []
+            },
+            {
+              "name": "quest-options",
+              "description": "Edit the Quest Options",
+              "options": []
+            },
+            {
+              "name": "reward-settings",
+              "description": "Edit the Reward Settings",
+              "options": []
+            },
+            {
+              "name": "roles",
+              "description": "Edit the Linked Roles",
+              "options": []
+            },
+            {
+              "name": "zone",
+              "description": "Edit a Monitor Zone",
+              "options": []
+            }
+          ]
+        },
+        {
+          "name": "find",
+          "description": "Find commands",
+          "subcommands": [
+            {
+              "name": "base",
+              "description": "Finds the closest base to an XZ coord.",
+              "options": [
+                {
+                  "name": "x",
+                  "type": "Number",
+                  "description": "X coordinate of the monitor zone",
+                  "required": true
+                },
+                {
+                  "name": "z",
+                  "type": "Number",
+                  "description": "Z coordinate of the monitor zone",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "unlinked-bases",
+              "description": "Finds unlinked bases, optionally near an XZ coord.",
+              "options": [
+                {
+                  "name": "x",
+                  "type": "Number",
+                  "description": "X coordinate of the monitor zone",
+                  "required": false
+                },
+                {
+                  "name": "z",
+                  "type": "Number",
+                  "description": "Z coordinate of the monitor zone",
+                  "required": false
+                }
+              ]
+            },
+            {
+              "name": "objspawner",
+              "description": "Finds the closest ObjSpawner to an XZ coord.",
+              "options": [
+                {
+                  "name": "x",
+                  "type": "Number",
+                  "description": "X coordinate of the monitor zone",
+                  "required": true
+                },
+                {
+                  "name": "z",
+                  "type": "Number",
+                  "description": "Z coordinate of the monitor zone",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "placements",
+              "description": "Finds the closest placement to an XZ coord.",
+              "options": [
+                {
+                  "name": "x",
+                  "type": "Number",
+                  "description": "X coordinate of the monitor zone",
+                  "required": true
+                },
+                {
+                  "name": "z",
+                  "type": "Number",
+                  "description": "Z coordinate of the monitor zone",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "user",
+              "description": "Finds the closest User to an XZ coord.",
+              "options": [
+                {
+                  "name": "x",
+                  "type": "Number",
+                  "description": "X coordinate of the monitor zone",
+                  "required": true
+                },
+                {
+                  "name": "z",
+                  "type": "Number",
+                  "description": "Z coordinate of the monitor zone",
+                  "required": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "mgmt",
+          "description": "Mgmt commands",
+          "subcommands": [
+            {
+              "name": "link",
+              "description": "Add (or remove) a user's link. If a link exists, the link will be overwritten.",
+              "options": [
+                {
+                  "name": "gamertag",
+                  "type": "String",
+                  "description": "New gamertag.",
+                  "required": true
+                },
+                {
+                  "name": "user",
+                  "type": "User",
+                  "description": "The target user. Leave blank to link yourself.",
+                  "required": false
+                }
+              ]
+            },
+            {
+              "name": "unlink",
+              "description": "Unlink a user's gamertag.",
+              "options": [
+                {
+                  "name": "user",
+                  "type": "User",
+                  "description": "The user to unlink.",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "pay",
+              "description": "Add (or remove) money to any user's balance or all users in a role",
+              "options": [
+                {
+                  "name": "amount",
+                  "type": "Number",
+                  "description": "The amount to add, use negative values to remove.",
+                  "required": true
+                },
+                {
+                  "name": "role",
+                  "type": "Role",
+                  "description": "The role of users whose balance to adjust.",
+                  "required": false
+                },
+                {
+                  "name": "user",
+                  "type": "User",
+                  "description": "The specific user's balance to adjust (leave empty to target a role).",
+                  "required": false
+                }
+              ]
+            },
+            {
+              "name": "process-queue",
+              "description": "Process the update queue. This will upload any pending files.",
+              "options": []
+            },
+            {
+              "name": "refresh-quests",
+              "description": "Force a quest refresh!",
+              "options": []
+            },
+            {
+              "name": "restart",
+              "description": "Restart the server.",
+              "options": []
+            },
+            {
+              "name": "stats",
+              "description": "View server statistics related to restart timing and predicted restart times.",
+              "options": []
+            },
+            {
+              "name": "rules-button",
+              "description": "Send the Agree to Rules button to this channel",
+              "options": []
+            }
+          ]
+        },
+        {
+          "name": "relink",
+          "description": "Relink commands",
+          "subcommands": [
+            {
+              "name": "category",
+              "description": "Relink a category. Do this in a channel within the category you want to relink.",
+              "options": []
+            },
+            {
+              "name": "channel",
+              "description": "Relink a channel. Do this in a channel you want to relink.",
+              "options": []
+            },
+            {
+              "name": "faction",
+              "description": "Relink a faction role. You must do this in a Faction Log Channel.",
+              "options": [
+                {
+                  "name": "role",
+                  "type": "Role",
+                  "description": "The new faction role",
+                  "required": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "remove",
+          "description": "Remove commands",
+          "subcommands": [
+            {
+              "name": "base",
+              "description": "Deletes a base and resets related the Flag. Don't do this to a base associated with a Faction.",
+              "options": [
+                {
+                  "name": "baseid",
+                  "type": "String",
+                  "description": "The BaseID of the base to delete",
+                  "required": false
+                }
+              ]
+            },
+            {
+              "name": "closed-tickets",
+              "description": "Delete all closed tickets",
+              "options": []
+            },
+            {
+              "name": "faction",
+              "description": "Deletes a faction and clears related data.",
+              "options": []
+            },
+            {
+              "name": "json",
+              "description": "Remove a JSON file from your object spawner array.",
+              "options": [
+                {
+                  "name": "keyword",
+                  "type": "String",
+                  "description": "Optional keyword to filter JSON files",
+                  "required": false
+                }
+              ]
+            },
+            {
+              "name": "objspawner",
+              "description": "Remove a Obj Spawner spawn.",
+              "options": [
+                {
+                  "name": "user",
+                  "type": "User",
+                  "description": "Get a list of all files belonging to this user.",
+                  "required": false
+                }
+              ]
+            },
+            {
+              "name": "bounty",
+              "description": "Remove active bounties from the board.",
+              "options": []
+            },
+            {
+              "name": "pra",
+              "description": "Remove PRA (Player Restricted Area) files from the server",
+              "options": [
+                {
+                  "name": "keyword",
+                  "type": "String",
+                  "description": "Keyword to filter files by",
+                  "required": false
+                }
+              ]
+            },
+            {
+              "name": "spawngear",
+              "description": "Remove spawn gear preset files from the server",
+              "options": [
+                {
+                  "name": "keyword",
+                  "type": "String",
+                  "description": "Keyword to filter files by",
+                  "required": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "spawn",
+          "description": "Spawn commands",
+          "subcommands": [
+            {
+              "name": "qr-code",
+              "description": "Start the QR Code Spawn Interaction, requires fireworks.",
+              "options": []
+            },
+            {
+              "name": "qr-set",
+              "description": "Set the location of your QR Code.",
+              "options": [
+                {
+                  "name": "url",
+                  "type": "String",
+                  "description": "Must be a shortened link, like this: bit.ly/48psURe",
+                  "required": true
+                },
+                {
+                  "name": "compass-heading",
+                  "type": "Number",
+                  "description": "The cardinal direction you will be facing when looking directly at the object",
+                  "required": true
+                },
+                {
+                  "name": "name",
+                  "type": "String",
+                  "description": "Name for your QR Code",
+                  "required": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "teleport",
+          "description": "Teleport commands",
+          "subcommands": [
+            {
+              "name": "start",
+              "description": "Start the Teleport Interaction, requires fireworks.",
+              "options": []
+            },
+            {
+              "name": "pra",
+              "description": "Set an origin and destination. Creates a return portal. Teleport to a specific elevation.",
+              "options": [
+                {
+                  "name": "force",
+                  "type": "Boolean",
+                  "description": "Forceful or graceful teleport",
+                  "required": true
+                },
+                {
+                  "name": "xpos",
+                  "type": "Number",
+                  "description": "Destination X Pos",
+                  "required": true
+                },
+                {
+                  "name": "ypos",
+                  "type": "Number",
+                  "description": "Destination Elevation",
+                  "required": true
+                },
+                {
+                  "name": "zpos",
+                  "type": "Number",
+                  "description": "Destination Z Pos",
+                  "required": true
+                },
+                {
+                  "name": "origin-x",
+                  "type": "Number",
+                  "description": "X coordinate of origin (skip fireworks if provided)",
+                  "required": false
+                },
+                {
+                  "name": "origin-y",
+                  "type": "Number",
+                  "description": "Y (Elevation) coordinate of origin (optional, default: 0)",
+                  "required": false
+                },
+                {
+                  "name": "origin-z",
+                  "type": "Number",
+                  "description": "Z coordinate of origin (skip fireworks if provided)",
+                  "required": false
+                },
+                {
+                  "name": "size",
+                  "type": "Number",
+                  "description": "Used to make a bigger zone to teleport more people.",
+                  "required": false
+                },
+                {
+                  "name": "name",
+                  "type": "String",
+                  "description": "Name for the PRA zone",
+                  "required": false
+                },
+                {
+                  "name": "duration",
+                  "type": "Number",
+                  "description": "Duration in minutes for the PRA to remain active. Default will auto-expire after subsequent restart.",
+                  "required": false
+                }
+              ]
+            },
+            {
+              "name": "pox",
+              "description": "Set an origin and destination. No return portal. Useful when you dont know destination elevation.",
+              "options": [
+                {
+                  "name": "force",
+                  "type": "Boolean",
+                  "description": "Forceful or graceful teleport",
+                  "required": true
+                },
+                {
+                  "name": "xpos",
+                  "type": "Number",
+                  "description": "Destination X Pos",
+                  "required": true
+                },
+                {
+                  "name": "ypos",
+                  "type": "Number",
+                  "description": "Destination Y Pos",
+                  "required": true
+                },
+                {
+                  "name": "origin-x",
+                  "type": "Number",
+                  "description": "X coordinate of origin (skip fireworks if provided)",
+                  "required": false
+                },
+                {
+                  "name": "origin-y",
+                  "type": "Number",
+                  "description": "Y (Elevation) coordinate of origin (optional, default: 0)",
+                  "required": false
+                },
+                {
+                  "name": "origin-z",
+                  "type": "Number",
+                  "description": "Z coordinate of origin (skip fireworks if provided)",
+                  "required": false
+                },
+                {
+                  "name": "size",
+                  "type": "Number",
+                  "description": "Used to make a bigger zone to teleport more people. 1-10",
+                  "required": false
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "subcommands": [],
+      "options": []
+    },
+    {
+      "name": "base",
+      "description": "Base commands",
+      "deleted": false,
+      "subcommandGroups": [
+        {
+          "name": "radar",
+          "description": "Radar Commands",
+          "subcommands": [
+            {
+              "name": "upgrade",
+              "description": "Upgrade your base's radar.",
+              "options": []
+            },
+            {
+              "name": "whitelist",
+              "description": "Add a player to the whitelist.",
+              "options": [
+                {
+                  "name": "player",
+                  "type": "User",
+                  "description": "Player to whitelist",
+                  "required": false
+                },
+                {
+                  "name": "gamertag",
+                  "type": "String",
+                  "description": "Gamertag of the player to whitelist",
+                  "required": false
+                },
+                {
+                  "name": "duration",
+                  "type": "Integer",
+                  "description": "Duration of the whitelist in minutes, -1 for permanent",
+                  "required": false
+                }
+              ]
+            },
+            {
+              "name": "unwhitelist",
+              "description": "Remove a player from the whitelist.",
+              "options": [
+                {
+                  "name": "player",
+                  "type": "User",
+                  "description": "Player to unwhitelist",
+                  "required": false
+                },
+                {
+                  "name": "gamertag",
+                  "type": "String",
+                  "description": "Gamertag of the player to unwhitelist",
+                  "required": false
+                }
+              ]
+            },
+            {
+              "name": "whitelist-list",
+              "description": "List all whitelisted players for a zone.",
+              "options": []
+            }
+          ]
+        }
+      ],
+      "subcommands": [
+        {
+          "name": "rename",
+          "description": "Rename the base you are at.",
+          "options": [
+            {
+              "name": "name",
+              "type": "String",
+              "description": "New Base Name",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "setup",
+          "description": "Name your base and claim your flag",
+          "options": [
+            {
+              "name": "name",
+              "type": "String",
+              "description": "The Name of Your New Base",
+              "required": true
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "economy",
+      "description": "economy command",
+      "deleted": false,
+      "subcommandGroups": [],
+      "subcommands": [
+        {
+          "name": "balance",
+          "description": "Check your balance.",
+          "options": []
+        },
+        {
+          "name": "daily",
+          "description": "Claim your daily reward.",
+          "options": []
+        },
+        {
+          "name": "beg",
+          "description": "Beg for money.",
+          "options": []
+        },
+        {
+          "name": "coin-toss",
+          "description": "Flip a coin to make money",
+          "options": [
+            {
+              "name": "bet",
+              "type": "Number",
+              "description": "How much?",
+              "required": true
+            },
+            {
+              "name": "on",
+              "type": "Number",
+              "description": "heads or tails",
+              "required": true,
+              "choices": [
+                {
+                  "name": "Heads",
+                  "value": "1"
+                },
+                {
+                  "name": "Tails",
+                  "value": "2"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "diceroll",
+          "description": "Roll the dice for a change to win.",
+          "options": [
+            {
+              "name": "bet",
+              "type": "Number",
+              "description": "How much?",
+              "required": true
+            },
+            {
+              "name": "number",
+              "type": "Number",
+              "description": "Choose a number, 1-6",
+              "required": true,
+              "choices": [
+                {
+                  "name": "1",
+                  "value": 1
+                },
+                {
+                  "name": "2",
+                  "value": 2
+                },
+                {
+                  "name": "3",
+                  "value": 3
+                },
+                {
+                  "name": "4",
+                  "value": 4
+                },
+                {
+                  "name": "5",
+                  "value": 5
+                },
+                {
+                  "name": "6",
+                  "value": 6
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "gamble",
+          "description": "Gamble some money.",
+          "options": [
+            {
+              "name": "bet",
+              "type": "Number",
+              "description": "How much?",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "pay",
+          "description": "Pay another player.",
+          "options": [
+            {
+              "name": "amount",
+              "type": "Number",
+              "description": "How much?",
+              "required": true
+            },
+            {
+              "name": "who",
+              "type": "User",
+              "description": "Recipient",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "rob",
+          "description": "Rob your victim...",
+          "options": [
+            {
+              "name": "victim_username",
+              "type": "User",
+              "description": "Enter the victim's Discord Username",
+              "required": false
+            },
+            {
+              "name": "victim_gamertag",
+              "type": "String",
+              "description": "Enter the victim's gamertag",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "events",
+      "description": "Event commands",
+      "deleted": false,
+      "subcommandGroups": [
+        {
+          "name": "add",
+          "description": "Add Commands",
+          "subcommands": [
+            {
+              "name": "files",
+              "description": "Add loot and scenery files to a scheduled event.",
+              "options": [
+                {
+                  "name": "loot",
+                  "type": "Attachment",
+                  "description": "JSON file for loot",
+                  "required": true
+                },
+                {
+                  "name": "scenery",
+                  "type": "Attachment",
+                  "description": "JSON file for scenery",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "announcement",
+              "description": "Add a dynamic event announcement.",
+              "options": []
+            }
+          ]
+        },
+        {
+          "name": "create",
+          "description": "Create Commands",
+          "subcommands": [
+            {
+              "name": "scheduled-event",
+              "description": "Set up a new scheduled event.",
+              "options": []
+            }
+          ]
+        },
+        {
+          "name": "edit",
+          "description": "Create Commands",
+          "subcommands": [
+            {
+              "name": "scheduled-event",
+              "description": "Edit a scheduled event.",
+              "options": []
+            },
+            {
+              "name": "announcement",
+              "description": "Edit a dynamic event announcement.",
+              "options": []
+            },
+            {
+              "name": "announcement-icon",
+              "description": "Edit a dynamic event announcement's icon.",
+              "options": [
+                {
+                  "name": "icon",
+                  "type": "String",
+                  "description": "Choose an icon for the event announcement.",
+                  "required": true,
+                  "choices": [
+                    {
+                      "name": "Crate",
+                      "value": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/refs/heads/main/DropIcon_web.png"
+                    },
+                    {
+                      "name": "Heli Crash",
+                      "value": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/refs/heads/main/heliEvent.png"
+                    },
+                    {
+                      "name": "Roadblock",
+                      "value": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/refs/heads/main/policeEvent.png"
+                    },
+                    {
+                      "name": "Pox",
+                      "value": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/refs/heads/main/poxEvent.png"
+                    },
+                    {
+                      "name": "Boat",
+                      "value": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/refs/heads/main/BoatEvent.png"
+                    },
+                    {
+                      "name": "Tool Shed",
+                      "value": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/refs/heads/main/toolEvent.png"
+                    },
+                    {
+                      "name": "Truck",
+                      "value": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/refs/heads/main/truckEvent.png"
+                    },
+                    {
+                      "name": "Car",
+                      "value": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/refs/heads/main/carEvent.png"
+                    },
+                    {
+                      "name": "Zombie Hoard",
+                      "value": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/refs/heads/main/zombieEvent.png"
+                    },
+                    {
+                      "name": "Convoy",
+                      "value": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/refs/heads/main/convoyEvent.png"
+                    },
+                    {
+                      "name": "Abandoned Train",
+                      "value": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/refs/heads/main/trainEvent.png"
+                    },
+                    {
+                      "name": "Humvee",
+                      "value": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/refs/heads/main/hummerEvent.png"
+                    },
+                    {
+                      "name": "Buried Stash",
+                      "value": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/refs/heads/main/buriedStash.png"
+                    },
+                    {
+                      "name": "Container",
+                      "value": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/refs/heads/main/containerEvent.png"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "subcommands": [],
+      "options": []
+    },
+    {
+      "name": "faction",
+      "description": "Faction command",
+      "deleted": false,
+      "subcommandGroups": [
+        {
+          "name": "bank",
+          "description": "Bank commands",
+          "subcommands": [
+            {
+              "name": "withdraw",
+              "description": "Withdraw money into from faction bank when nearby.",
+              "options": [
+                {
+                  "name": "amount",
+                  "type": "Number",
+                  "description": "Amount to withdraw",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "deposit",
+              "description": "Deposit money into your faction bank when nearby.",
+              "options": [
+                {
+                  "name": "amount",
+                  "type": "Number",
+                  "description": "Amount to deposit",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "balance",
+              "description": "Check the faction bank balance.",
+              "options": []
+            },
+            {
+              "name": "setup",
+              "description": "Start the faction bank interaction.",
+              "options": []
+            },
+            {
+              "name": "set-pos",
+              "description": "Set the faction bank position, use /faction bank setup first.",
+              "options": [
+                {
+                  "name": "compass-heading",
+                  "type": "Number",
+                  "description": "The cardinal direction you would like the back of the structure to face",
+                  "required": true
+                },
+                {
+                  "name": "flat",
+                  "type": "Boolean",
+                  "description": "Are you placing your structure on perfectly level ground?",
+                  "required": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "change",
+          "description": "Change commands",
+          "subcommands": [
+            {
+              "name": "bio",
+              "description": "Edit the faction bio and change the faction name.",
+              "options": []
+            },
+            {
+              "name": "color",
+              "description": "Set the color of your Faction Role in Discord.",
+              "options": [
+                {
+                  "name": "hex-color",
+                  "type": "String",
+                  "description": "A valid hex color. (e.g., #123456)",
+                  "required": false
+                }
+              ]
+            },
+            {
+              "name": "leader",
+              "description": "Promote a new leader and demote the current leader to a regular member.",
+              "options": [
+                {
+                  "name": "new_leader",
+                  "type": "User",
+                  "description": "The User to Promote to Leader",
+                  "required": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "members",
+          "description": "Members commands",
+          "subcommands": [
+            {
+              "name": "promote",
+              "description": "Promote a member to co-leader.",
+              "options": [
+                {
+                  "name": "user",
+                  "type": "User",
+                  "description": "The User to Promote",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "demote",
+              "description": "Demote a co-leader to a regular member.",
+              "options": [
+                {
+                  "name": "user",
+                  "type": "User",
+                  "description": "The User to Demote",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "kick",
+              "description": "Kick a member from the faction.",
+              "options": [
+                {
+                  "name": "user",
+                  "type": "User",
+                  "description": "The User to Kick",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "list",
+              "description": "List all members of the faction.",
+              "options": []
+            },
+            {
+              "name": "invite",
+              "description": "Invite a user to your faction.",
+              "options": [
+                {
+                  "name": "user",
+                  "type": "User",
+                  "description": "The User to Invite",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "leave",
+              "description": "Leave your current faction.",
+              "options": []
+            }
+          ]
+        },
+        {
+          "name": "base",
+          "description": "Base commands",
+          "subcommands": [
+            {
+              "name": "add",
+              "description": "Raise your faction flag at an unclaimed flag pole to add another base to your faction!",
+              "options": [
+                {
+                  "name": "name",
+                  "type": "String",
+                  "description": "Name of your new base",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "remove",
+              "description": "Remove a base from your faction.",
+              "options": []
+            },
+            {
+              "name": "list",
+              "description": "List all bases of the faction.",
+              "options": []
+            }
+          ]
+        },
+        {
+          "name": "structures",
+          "description": "Structures commands",
+          "subcommands": [
+            {
+              "name": "door",
+              "description": "Open or close the door on the selected structure on restart.",
+              "options": [
+                {
+                  "name": "switch",
+                  "type": "String",
+                  "description": "Door state.",
+                  "required": true,
+                  "choices": [
+                    {
+                      "name": "Open",
+                      "value": "open"
+                    },
+                    {
+                      "name": "Close",
+                      "value": "close"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "pigeon-coop",
+              "description": "Call the pigeons to follow you for a while, must have a pigeon coop at base.",
+              "options": []
+            }
+          ]
+        }
+      ],
+      "subcommands": [
+        {
+          "name": "setup",
+          "description": "Start a faction!",
+          "options": [
+            {
+              "name": "name",
+              "type": "String",
+              "description": "Set The Name of Your New Faction",
+              "required": true
+            },
+            {
+              "name": "color",
+              "type": "String",
+              "description": "Specify the hex color value for your Faction Role (e.g., #1ABC9C)",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "help",
+      "description": "Displays a help menu for all commands.",
+      "deleted": true,
+      "subcommandGroups": [],
+      "subcommands": [],
+      "options": []
+    },
+    {
+      "name": "inventory",
+      "description": "Inventory commands",
+      "deleted": false,
+      "subcommandGroups": [
+        {
+          "name": "item",
+          "description": "item Commands",
+          "subcommands": [
+            {
+              "name": "place",
+              "description": "Open a ticket to place your structure for next reset. Or move an existing one.",
+              "options": []
+            },
+            {
+              "name": "list",
+              "description": "List & Edit your existing structure placements.",
+              "options": []
+            },
+            {
+              "name": "set-pos",
+              "description": "Place Fireworks to set the location of your structure, use in your Ticket.",
+              "options": [
+                {
+                  "name": "compass-heading",
+                  "type": "Number",
+                  "description": "The cardinal direction you would like the back of the structure to face",
+                  "required": true
+                },
+                {
+                  "name": "flat",
+                  "type": "Boolean",
+                  "description": "Are you placing your structure on perfectly level ground?",
+                  "required": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "purchase",
+          "description": "purchase Commands",
+          "subcommands": [
+            {
+              "name": "list",
+              "description": "List items in your inventory",
+              "options": []
+            }
+          ]
+        }
+      ],
+      "subcommands": [],
+      "options": []
+    },
+    {
+      "name": "link",
+      "description": "Link your gamertag...",
+      "deleted": false,
+      "subcommandGroups": [],
+      "subcommands": [],
+      "options": [
+        {
+          "name": "gamertag",
+          "type": "String",
+          "description": "Your gamertag, exactly as it appears in the DayZ Online list.",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "mgmt",
+      "description": "Management commands",
+      "deleted": false,
+      "subcommandGroups": [
+        {
+          "name": "add",
+          "description": "Add commands",
+          "subcommands": [
+            {
+              "name": "ban",
+              "description": "Ban a player and add them to the remote list.",
+              "options": [
+                {
+                  "name": "gamertag",
+                  "type": "String",
+                  "description": "Player's in-game name. Optionally provide multiple, separated by commas.",
+                  "required": true
+                },
+                {
+                  "name": "duration",
+                  "type": "Number",
+                  "description": "How long to ban them for, in minutes. -1 for forever.",
+                  "required": true
+                },
+                {
+                  "name": "reason",
+                  "type": "String",
+                  "description": "Reason for the ban",
+                  "required": false
+                },
+                {
+                  "name": "banid",
+                  "type": "Boolean",
+                  "description": "Ban the in-game ID of the player as well, prevents ban bypass by gamertag change.",
+                  "required": false
+                }
+              ]
+            },
+            {
+              "name": "priority-q",
+              "description": "Priorize a player and add them to the remote list.",
+              "options": [
+                {
+                  "name": "gamertag",
+                  "type": "String",
+                  "description": "Player's in-game name. Optionally provide multiple, separated by commas.",
+                  "required": true
+                },
+                {
+                  "name": "duration",
+                  "type": "Number",
+                  "description": "How long to priority them for, in minutes. -1 for forever.",
+                  "required": true
+                },
+                {
+                  "name": "reason",
+                  "type": "String",
+                  "description": "Reason for the priority",
+                  "required": false
+                }
+              ]
+            },
+            {
+              "name": "whitelist",
+              "description": "Whitelist a player and add them to the remote list.",
+              "options": [
+                {
+                  "name": "gamertag",
+                  "type": "String",
+                  "description": "Player's in-game name. Optionally provide multiple, separated by commas.",
+                  "required": true
+                },
+                {
+                  "name": "duration",
+                  "type": "Number",
+                  "description": "How long to whitelist them for, in minutes. -1 for forever.",
+                  "required": true
+                },
+                {
+                  "name": "reason",
+                  "type": "String",
+                  "description": "Reason for the whitelist",
+                  "required": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "remove",
+          "description": "Remove commands",
+          "subcommands": [
+            {
+              "name": "ban",
+              "description": "Unban a player and remove them from the remote list.",
+              "options": [
+                {
+                  "name": "gamertag",
+                  "type": "String",
+                  "description": "Player's Gamertag, PSN, Name, exactly as it appears in-game",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "priority-q",
+              "description": "De-Prioritize a player and all their (linked) alts by their in-game name.",
+              "options": [
+                {
+                  "name": "gamertag",
+                  "type": "String",
+                  "description": "Player's Gamertag, PSN, Name, exactly as it appears in-game",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "whitelist",
+              "description": "De-whitelist a player and remove them from the remote list.",
+              "options": [
+                {
+                  "name": "gamertag",
+                  "type": "String",
+                  "description": "Player's Gamertag, PSN, Name, exactly as it appears in-game",
+                  "required": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "view",
+          "description": "View commands",
+          "subcommands": [
+            {
+              "name": "bans",
+              "description": "View all currently banned players",
+              "options": []
+            },
+            {
+              "name": "priorities",
+              "description": "View all currently prioritized players",
+              "options": []
+            },
+            {
+              "name": "whitelist",
+              "description": "View all currently whitelisted players",
+              "options": []
+            }
+          ]
+        }
+      ],
+      "subcommands": [
+        {
+          "name": "close-ticket",
+          "description": "Close this ticket.",
+          "options": []
+        },
+        {
+          "name": "status-channels",
+          "description": "Enable or disable status channels.",
+          "options": []
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "player",
+      "description": "Player command",
+      "deleted": false,
+      "subcommandGroups": [],
+      "subcommands": [
+        {
+          "name": "link-alt",
+          "description": "Link your alternative gamertag",
+          "options": [
+            {
+              "name": "alt-gamertag",
+              "type": "String",
+              "description": "Your alt gamertag, exactly as it appears on Xbox",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "link",
+          "description": "Link your gamertag",
+          "options": [
+            {
+              "name": "gamertag",
+              "type": "String",
+              "description": "Your gamertag, exactly as it appears in the DayZ Online list.",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "ping",
+          "description": "Replies with pong",
+          "options": []
+        },
+        {
+          "name": "unlink-alts",
+          "description": "unlink all your alts",
+          "options": []
+        },
+        {
+          "name": "unlink",
+          "description": "Unlink your gamertag",
+          "options": []
+        },
+        {
+          "name": "whereami",
+          "description": "Shows your last logged location. Up to 15 minutes out of date. Only visible to you.",
+          "options": []
+        },
+        {
+          "name": "set-bounty",
+          "description": "Place a bounty on another player.",
+          "options": [
+            {
+              "name": "gamertag",
+              "type": "String",
+              "description": "Gamertag of the player to bounty",
+              "required": true
+            },
+            {
+              "name": "amount",
+              "type": "Integer",
+              "description": "Amount of money to place on the bounty",
+              "required": true
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "quest",
+      "description": "quest command",
+      "deleted": false,
+      "subcommandGroups": [],
+      "subcommands": [
+        {
+          "name": "log",
+          "description": "View details on your active quests, used only in the \"quest-log\" channel.",
+          "options": []
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "server",
+      "description": "Server commands",
+      "deleted": false,
+      "subcommandGroups": [
+        {
+          "name": "edit",
+          "description": "Edit server settings",
+          "subcommands": [
+            {
+              "name": "settings",
+              "description": "Edit Nitrado / CfgGameplay settings",
+              "options": []
+            }
+          ]
+        },
+        {
+          "name": "wipe",
+          "description": "Send an embed with faction stats",
+          "subcommands": [
+            {
+              "name": "currency",
+              "description": "Wipe the currency balance of all users, a specific user, or users in a role",
+              "options": [
+                {
+                  "name": "role",
+                  "type": "Role",
+                  "description": "The role of users whose balance to wipe.",
+                  "required": false
+                },
+                {
+                  "name": "user",
+                  "type": "User",
+                  "description": "The specific user's balance to wipe (leave empty to target all users).",
+                  "required": false
+                },
+                {
+                  "name": "allplayers",
+                  "type": "Boolean",
+                  "description": "Wipe the balance for all players.",
+                  "required": false
+                }
+              ]
+            },
+            {
+              "name": "initiate-wipe",
+              "description": "Initiates a server wipe with various options.",
+              "options": [
+                {
+                  "name": "confirm",
+                  "type": "String",
+                  "description": "Type \"confirm\" to initiate the wipe process.",
+                  "required": true
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "subcommands": [
+        {
+          "name": "sync-ftp",
+          "description": "Re-sync the FTP credentials for the game server",
+          "options": []
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "shop",
+      "description": "Interact with the shop to buy items",
+      "deleted": false,
+      "subcommandGroups": [],
+      "subcommands": [],
+      "options": []
+    },
+    {
+      "name": "stats",
+      "description": "Stats commands",
+      "deleted": false,
+      "subcommandGroups": [],
+      "subcommands": [
+        {
+          "name": "player",
+          "description": "Send an embed with player stats",
+          "options": [
+            {
+              "name": "user",
+              "type": "User",
+              "description": "The user's stats you want to see.",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "faction",
+          "description": "Send an embed with faction stats",
+          "options": [
+            {
+              "name": "faction-role",
+              "type": "Role",
+              "description": "The faction's stats you want to see.",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "radar",
+          "description": "Send an embed with your faction's base radar stats",
+          "options": []
+        },
+        {
+          "name": "admin",
+          "description": "Admin User Lookup",
+          "options": [
+            {
+              "name": "user",
+              "type": "User",
+              "description": "The user's stats you want to see.",
+              "required": false
+            },
+            {
+              "name": "gamertag",
+              "type": "String",
+              "description": "The gamertag of the user's stats you want to see.",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "store",
+      "description": "Store commands",
+      "deleted": false,
+      "subcommandGroups": [
+        {
+          "name": "item",
+          "description": "Item Commands",
+          "subcommands": [
+            {
+              "name": "add",
+              "description": "Add an item a shop.",
+              "options": [
+                {
+                  "name": "name",
+                  "type": "String",
+                  "description": "Name to be displayed in shop",
+                  "required": true
+                },
+                {
+                  "name": "description",
+                  "type": "String",
+                  "description": "Description to be displayed in shop",
+                  "required": true
+                },
+                {
+                  "name": "price",
+                  "type": "Number",
+                  "description": "Item Price",
+                  "required": true
+                },
+                {
+                  "name": "max-quantity",
+                  "type": "Number",
+                  "description": "The Maximum Number of This Item a Player Can Buy, -1 = unlimited",
+                  "required": true
+                },
+                {
+                  "name": "lifetime",
+                  "type": "Number",
+                  "description": "Time, in minutes, this item will remain on the server after placement. -1 = forever.",
+                  "required": true
+                },
+                {
+                  "name": "faction-level",
+                  "type": "Number",
+                  "description": "Faction level required for purchase, -1 for none.",
+                  "required": true
+                },
+                {
+                  "name": "file",
+                  "type": "Attachment",
+                  "description": "JSON File for the item.",
+                  "required": true
+                },
+                {
+                  "name": "file_flat",
+                  "type": "Attachment",
+                  "description": "JSON File for the item's flat surface version, optional.",
+                  "required": false
+                },
+                {
+                  "name": "author",
+                  "type": "String",
+                  "description": "The author of the asset, optional.",
+                  "required": false
+                },
+                {
+                  "name": "image-path",
+                  "type": "String",
+                  "description": "URL of the image to be displayed of the item, optional. Should end in .png or .jpg",
+                  "required": false
+                }
+              ]
+            },
+            {
+              "name": "add-structure",
+              "description": "Add a faction structure with a door to a shop.",
+              "options": [
+                {
+                  "name": "name",
+                  "type": "String",
+                  "description": "Name to be displayed in shop",
+                  "required": true
+                },
+                {
+                  "name": "description",
+                  "type": "String",
+                  "description": "Description to be displayed in shop",
+                  "required": true
+                },
+                {
+                  "name": "price",
+                  "type": "Number",
+                  "description": "Item Price",
+                  "required": true
+                },
+                {
+                  "name": "max-quantity",
+                  "type": "Number",
+                  "description": "The Maximum Number of This Item a Player Can Buy, -1 = unlimited",
+                  "required": true
+                },
+                {
+                  "name": "lifetime",
+                  "type": "Number",
+                  "description": "Time, in minutes, this item will remain on the server after placement. -1 = forever.",
+                  "required": true
+                },
+                {
+                  "name": "faction-level",
+                  "type": "Number",
+                  "description": "Faction level required for purchase, -1 for none.",
+                  "required": true
+                },
+                {
+                  "name": "ramp_open",
+                  "type": "Attachment",
+                  "description": "JSON File for the Open, Ramp version of the structure.",
+                  "required": true
+                },
+                {
+                  "name": "flat_open",
+                  "type": "Attachment",
+                  "description": "JSON File for the Open, Flat version of the structure.",
+                  "required": true
+                },
+                {
+                  "name": "ramp_closed",
+                  "type": "Attachment",
+                  "description": "JSON File for the Closed, Ramp version of the structure.",
+                  "required": true
+                },
+                {
+                  "name": "flat_closed",
+                  "type": "Attachment",
+                  "description": "JSON File for the Closed, Flat version of the structure.",
+                  "required": true
+                },
+                {
+                  "name": "author",
+                  "type": "String",
+                  "description": "The author of the asset, optional.",
+                  "required": false
+                },
+                {
+                  "name": "image-path",
+                  "type": "String",
+                  "description": "URL of the image to be displayed of the item, optional. Should end in .png or .jpg",
+                  "required": false
+                }
+              ]
+            },
+            {
+              "name": "edit",
+              "description": "Edit an item in a shop.",
+              "options": []
+            },
+            {
+              "name": "update",
+              "description": "Edit an item in a shop.",
+              "options": [
+                {
+                  "name": "new-file",
+                  "type": "Attachment",
+                  "description": "New JSON File for the item.",
+                  "required": true
+                },
+                {
+                  "name": "new-file-flat",
+                  "type": "Attachment",
+                  "description": "New JSON File for the item's flat surface version, optional.",
+                  "required": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "purchase",
+          "description": "Item Commands",
+          "subcommands": [
+            {
+              "name": "delete",
+              "description": "Delete a User's Purchase(s).",
+              "options": [
+                {
+                  "name": "user",
+                  "type": "User",
+                  "description": "The target user.",
+                  "required": true
+                },
+                {
+                  "name": "all",
+                  "type": "Boolean",
+                  "description": "Remove all purhcases?",
+                  "required": false
+                }
+              ]
+            },
+            {
+              "name": "give",
+              "description": "Give a shop item to a user.",
+              "options": [
+                {
+                  "name": "user",
+                  "type": "User",
+                  "description": "The target user.",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "reset-lifetime",
+              "description": "Delete a User's Purchase(s).",
+              "options": [
+                {
+                  "name": "user",
+                  "type": "User",
+                  "description": "The target user.",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "edit",
+              "description": "Edit a User's Purchase.",
+              "options": [
+                {
+                  "name": "user",
+                  "type": "User",
+                  "description": "The target user.",
+                  "required": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "mgmt",
+          "description": "Mgmt Commands",
+          "subcommands": [
+            {
+              "name": "copy-shop",
+              "description": "Copy a shop from one service to another, avoids duplicates.",
+              "options": []
+            },
+            {
+              "name": "delete-shop",
+              "description": "Delete a shop from the database.",
+              "options": []
+            },
+            {
+              "name": "add-category",
+              "description": "Add a new category to the shop.",
+              "options": [
+                {
+                  "name": "name",
+                  "type": "String",
+                  "description": "The name of the category.",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "remove-category",
+              "description": "Remove a category from the shop.",
+              "options": []
+            },
+            {
+              "name": "list-categories",
+              "description": "List all shop categories (default and custom).",
+              "options": []
+            }
+          ]
+        }
+      ],
+      "subcommands": [],
+      "options": []
+    },
+    {
+      "name": "trader",
+      "description": "Trader commands",
+      "deleted": false,
+      "subcommandGroups": [
+        {
+          "name": "door",
+          "description": "Door Commands",
+          "subcommands": [
+            {
+              "name": "auto",
+              "description": "Open (or close) the Trader Door Gracefully",
+              "options": [
+                {
+                  "name": "switch",
+                  "type": "Boolean",
+                  "description": "True = Open, False = Closed",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "force",
+              "description": "Open (or close) the Trader Door Now",
+              "options": [
+                {
+                  "name": "switch",
+                  "type": "Boolean",
+                  "description": "True = Open, False = Closed",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "upload",
+              "description": "Upload JSON files for trader open and trader closed states.",
+              "options": [
+                {
+                  "name": "traderopen",
+                  "type": "Attachment",
+                  "description": "JSON file for when the trader is open",
+                  "required": true
+                },
+                {
+                  "name": "traderclosed",
+                  "type": "Attachment",
+                  "description": "JSON file for when the trader is closed",
+                  "required": true
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "subcommands": [
+        {
+          "name": "pay",
+          "description": "Used by traders to add (or remove) money to a user's balance.",
+          "options": [
+            {
+              "name": "amount",
+              "type": "Number",
+              "description": "The amount to add, use negative values to remove.",
+              "required": true
+            },
+            {
+              "name": "user",
+              "type": "User",
+              "description": "The specific user's balance to adjust.",
+              "required": true
+            },
+            {
+              "name": "reason",
+              "type": "String",
+              "description": "What is the trade for?.",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "options": []
+    }
+  ]
+}

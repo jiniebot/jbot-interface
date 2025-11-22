@@ -1,0 +1,204 @@
+{
+  "Flag_Options": [
+    {
+      "label": "Altis Flag",
+      "value": "Flag_Altis",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_Altis.png"
+    },
+    {
+      "label": "APA Flag",
+      "value": "Flag_APA",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_APA.png"
+    },
+    {
+      "label": "Bear Flag",
+      "value": "Flag_Bear",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_Bear.png"
+    },
+    {
+      "label": "Bohemia Flag",
+      "value": "Flag_Bohemia",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_BI.png"
+    },
+    {
+      "label": "Brain Flag",
+      "value": "Flag_BrainZ",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_BrainZ.png"
+    },
+    {
+      "label": "Canibals Flag",
+      "value": "Flag_Cannibals",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_Jolly.png"
+    },
+    {
+      "label": "CDF Flag",
+      "value": "Flag_CDF",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_CDF.png"
+    },
+    {
+      "label": "Chedaki Flag",
+      "value": "Flag_Chedaki",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_Chedaki.png"
+    },
+    {
+      "label": "CHEL Flag",
+      "value": "Flag_CHEL",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_CHEL.png"
+    },
+    {
+      "label": "Chernarus Flag",
+      "value": "Flag_Chernarus",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_Chernarus.png"
+    },
+    {
+      "label": "CMC Flag",
+      "value": "Flag_CMC",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_CMC.png"
+    },
+    {
+      "label": "Crook Flag",
+      "value": "Flag_Crook",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_Crook.png"
+    },
+    {
+      "label": "DayZ Flag",
+      "value": "Flag_DayZ",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_DayZ.png"
+    },
+    {
+      "label": "Fawn Flag",
+      "value": "Flag_BabyDeer",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_Baby%20Deer.png"
+    },
+    {
+      "label": "HunterZ Flag",
+      "value": "Flag_HunterZ",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_HunterZ.png"
+    },
+    {
+      "label": "Livonia Army Flag",
+      "value": "Flag_LivoniaArmy",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_LDF.png"
+    },
+    {
+      "label": "Livonia Flag",
+      "value": "Flag_Livonia",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_Livonia.png"
+    },
+    {
+      "label": "Livonia Police Flag",
+      "value": "Flag_LivoniaPolice",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_Police.png"
+    },
+    {
+      "label": "NAPA Flag",
+      "value": "Flag_NAPA",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_NAPA.png"
+    },
+    {
+      "label": "North Sahrani Flag",
+      "value": "Flag_NSahrani",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_NSahrani.png"
+    },
+    {
+      "label": "Pirate Flag",
+      "value": "Flag_Pirates",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_Pirates.png"
+    },
+    {
+      "label": "Refuge Flag",
+      "value": "Flag_Refuge",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_Refuge.png"
+    },
+    {
+      "label": "Rex Flag",
+      "value": "Flag_Rex",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_Rex.png"
+    },
+    {
+      "label": "Rooster Flag",
+      "value": "Flag_Rooster",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_Rooster.png"
+    },
+    {
+      "label": "RSTA Flag",
+      "value": "Flag_RSTA",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_RSTA.png"
+    },
+    {
+      "label": "Snake Flag",
+      "value": "Flag_Snake",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_Snake.png"
+    },
+    {
+      "label": "South Sahrani Flag",
+      "value": "Flag_SSahrani",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_SSahrani.png"
+    },
+    {
+      "label": "TEC Flag",
+      "value": "Flag_TEC",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_TEC.png"
+    },
+    {
+      "label": "UEC Flag",
+      "value": "Flag_UEC",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_UEC.png"
+    },
+    {
+      "label": "Wolf Flag",
+      "value": "Flag_Wolf",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_Wolf.png"
+    },
+    {
+      "label": "Zagorky Flag",
+      "value": "Flag_Zagorky",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_Zagorky.png"
+    },
+    {
+      "label": "Zenit Flag",
+      "value": "Flag_Zenit",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/main/Flag_Zenit.png"
+    }
+  ],
+  "Admin_Flags": [
+    {
+      "label": "White Flag",
+      "value": "Flag_White",
+      "description": "A Flag",
+      "imgpath": "https://raw.githubusercontent.com/jiniebot/JJDZAM_images/8f963d2b025e82322867638b1cb9443921ce8478/Flag_White.png"
+    }
+  ]
+}

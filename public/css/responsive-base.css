@@ -1,0 +1,334 @@
+/* 
+ * Responsive Base Utilities
+ * A centralized responsive system for mobile and desktop layouts
+ * Include this in all pages that need responsive support
+ */
+
+:root {
+  /* Breakpoints */
+  --breakpoint-mobile: 480px;
+  --breakpoint-tablet: 768px;
+  --breakpoint-desktop: 1024px;
+  --breakpoint-wide: 1440px;
+  
+  /* Touch-friendly sizing */
+  --touch-target-min: 44px;
+  --touch-spacing: 12px;
+  
+  /* Font scaling */
+  --font-scale-mobile: 0.875;
+  --font-scale-tablet: 0.9375;
+  --font-scale-desktop: 1;
+}
+
+/* ===== UTILITY CLASSES ===== */
+
+/* Display utilities for different screen sizes */
+.mobile-only {
+  display: none !important;
+}
+
+.tablet-only {
+  display: none !important;
+}
+
+.desktop-only {
+  display: block !important;
+}
+
+@media (max-width: 768px) {
+  .mobile-only {
+    display: block !important;
+  }
+  
+  .desktop-only {
+    display: none !important;
+  }
+  
+  .mobile-flex {
+    display: flex !important;
+  }
+  
+  .mobile-grid {
+    display: grid !important;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .tablet-only {
+    display: block !important;
+  }
+  
+  .mobile-only {
+    display: none !important;
+  }
+}
+
+/* Flex direction utilities */
+.flex-row-desktop {
+  flex-direction: row;
+}
+
+@media (max-width: 768px) {
+  .flex-row-desktop {
+    flex-direction: column;
+  }
+}
+
+.flex-col-mobile {
+  flex-direction: row;
+}
+
+@media (max-width: 768px) {
+  .flex-col-mobile {
+    flex-direction: column;
+  }
+}
+
+/* Spacing utilities - responsive padding/margin */
+.responsive-padding {
+  padding: 3rem 2rem;
+}
+
+@media (max-width: 768px) {
+  .responsive-padding {
+    padding: 1.5rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .responsive-padding {
+    padding: 1rem 0.75rem;
+  }
+}
+
+/* Container utilities */
+.responsive-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+@media (max-width: 768px) {
+  .responsive-container {
+    padding: 0 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .responsive-container {
+    padding: 0 0.75rem;
+  }
+}
+
+/* Touch-friendly sizing */
+.touch-target {
+  min-width: var(--touch-target-min);
+  min-height: var(--touch-target-min);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Grid utilities - responsive columns */
+.responsive-grid {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+@media (max-width: 768px) {
+  .responsive-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+/* ===== MOBILE OPTIMIZATIONS ===== */
+
+@media (max-width: 768px) {
+  /* Prevent zoom on input focus */
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="password"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+  
+  /* Improve touch scrolling */
+  * {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  
+  /* Prevent pull-to-refresh */
+  body {
+    overscroll-behavior-y: none;
+  }
+  
+  /* Hide scrollbars on mobile unless scrolling */
+  *::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  
+  *::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+  }
+  
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+/* ===== HOVER STATE HANDLING ===== */
+
+/* Only apply hover effects on devices that support hover */
+@media (hover: hover) and (pointer: fine) {
+  .hover-lift:hover {
+    transform: translateY(-2px);
+  }
+  
+  .hover-scale:hover {
+    transform: scale(1.05);
+  }
+  
+  .hover-brighten:hover {
+    filter: brightness(1.1);
+  }
+}
+
+/* Touch devices get active states instead */
+@media (hover: none) and (pointer: coarse) {
+  .hover-lift:active {
+    transform: scale(0.98);
+  }
+  
+  .hover-scale:active {
+    transform: scale(0.95);
+  }
+  
+  .hover-brighten:active {
+    filter: brightness(0.9);
+  }
+}
+
+/* ===== ORIENTATION HANDLING ===== */
+
+/* Landscape mobile specific adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+  .landscape-hide {
+    display: none !important;
+  }
+  
+  .landscape-compact {
+    padding: 0.5rem !important;
+    font-size: 0.875rem !important;
+  }
+}
+
+/* ===== SAFE AREA HANDLING (for notches/iOS) ===== */
+
+@supports (padding: env(safe-area-inset-top)) {
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .safe-left {
+    padding-left: env(safe-area-inset-left);
+  }
+  
+  .safe-right {
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* ===== TYPOGRAPHY SCALING ===== */
+
+.responsive-text-xl {
+  font-size: 2.5rem;
+}
+
+.responsive-text-lg {
+  font-size: 1.5rem;
+}
+
+.responsive-text-md {
+  font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+  .responsive-text-xl {
+    font-size: 1.75rem;
+  }
+  
+  .responsive-text-lg {
+    font-size: 1.25rem;
+  }
+  
+  .responsive-text-md {
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .responsive-text-xl {
+    font-size: 1.5rem;
+  }
+  
+  .responsive-text-lg {
+    font-size: 1.125rem;
+  }
+  
+  .responsive-text-md {
+    font-size: 0.8125rem;
+  }
+}
+
+/* ===== ACCESSIBILITY ===== */
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .frosted-panel,
+  .floating-panel,
+  .ios-card {
+    border-width: 3px;
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+}
+
+/* ===== PRINT STYLES ===== */
+
+@media print {
+  .navbar,
+  .toolbar,
+  #bottom-toolbar,
+  #top-controls,
+  .control-btn,
+  .filter-panel,
+  .floating-panel {
+    display: none !important;
+  }
+  
+  body {
+    background: white !important;
+    color: black !important;
+  }
+}

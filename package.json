@@ -1,0 +1,37 @@
+{
+  "name": "mapdl",
+  "version": "1.0.0",
+  "main": "mapDL.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "NODE_ENV=development node server.js",
+    "prod": "NODE_ENV=production node server.js",
+    "security:generate": "node generate-secrets.js --generate",
+    "security:validate": "node generate-secrets.js --validate",
+    "security:checklist": "node generate-secrets.js --checklist",
+    "audit": "npm audit",
+    "audit:fix": "npm audit fix",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "connect-mongo": "^5.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "express-mongo-sanitize": "^2.2.0",
+    "express-rate-limit": "^8.2.1",
+    "express-session": "^1.18.1",
+    "express-validator": "^7.3.1",
+    "helmet": "^8.1.0",
+    "hpp": "^0.2.3",
+    "leaflet": "^1.9.4",
+    "mongoose": "^8.9.5",
+    "p-map": "^7.0.3",
+    "passport": "^0.7.0",
+    "passport-discord": "^0.1.4"
+  }
+}

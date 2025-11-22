@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard - JinieBot</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/dashboard-ios.css">
+    <link rel="stylesheet" href="/css/responsive-base.css">
+    <link rel="stylesheet" href="/css/dashboard-mobile.css">
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+</head>
+<body>
+    <!-- Top Control Bar -->
+    <div id="top-controls">
+        <!-- Left Controls -->
+        <div class="control-group left-controls">
+            <button class="control-btn" id="toggleLeftPanel" title="Toggle Info Panel">
+                <span>ℹ️</span>
+            </button>
+            <button class="control-btn" id="filterBtn" title="Filter Markers">
+                <span>🔍</span>
+            </button>
+        </div>
+
+        <!-- Center Controls -->
+        <div class="control-group center-controls">
+            <button class="control-btn" id="zoomIn" title="Zoom In">
+                <span>+</span>
+            </button>
+            <button class="control-btn" id="zoomOut" title="Zoom Out">
+                <span>−</span>
+            </button>
+            <button class="control-btn" id="mapViewToggle" title="Toggle Map View">
+                <span>🗺️</span>
+            </button>
+        </div>
+
+        <!-- Right Controls -->
+        <div class="control-group right-controls">
+            <button class="control-btn" id="toggleRightPanel" title="Toggle Actions Panel">
+                <span>⚙️</span>
+            </button>
+            <button class="control-btn menu-button" id="menuButton" title="Menu">
+                <span>⋯</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Filter Panel -->
+    <div id="filterPanel" class="filter-panel">
+        <div class="filter-header">
+            <h3>Map Filters</h3>
+            <button class="filter-close" id="filterCloseBtn">✕</button>
+        </div>
+        <div class="filter-content">
+            <div class="filter-section">
+                <label class="filter-toggle">
+                    <input type="checkbox" id="toggleRecentPlayers" checked>
+                    <span class="filter-icon">👤</span>
+                    <span class="filter-label">Recent Players</span>
+                </label>
+                <label class="filter-toggle">
+                    <input type="checkbox" id="toggleBases" checked>
+                    <span class="filter-icon">🏴</span>
+                    <span class="filter-label">Bases</span>
+                </label>
+                <label class="filter-toggle">
+                    <input type="checkbox" id="toggleMonitorZones" checked>
+                    <span class="filter-icon">🗺️</span>
+                    <span class="filter-label">Monitor Zones</span>
+                </label>
+                <label class="filter-toggle">
+                    <input type="checkbox" id="toggleActiveObjs" checked>
+                    <span class="filter-icon">📦</span>
+                    <span class="filter-label">Spawned Objects</span>
+                </label>
+            </div>
+            <div class="filter-divider"></div>
+            <div class="filter-section">
+                <h4 class="filter-section-title">Map Markers</h4>
+                <label class="filter-toggle">
+                    <input type="checkbox" class="category-item" data-type="Capital">
+                    <span class="filter-icon">🏛️</span>
+                    <span class="filter-label">Capitals</span>
+                </label>
+                <label class="filter-toggle">
+                    <input type="checkbox" class="category-item" data-type="City" checked>
+                    <span class="filter-icon">🏙️</span>
+                    <span class="filter-label">Cities</span>
+                </label>
+                <label class="filter-toggle">
+                    <input type="checkbox" class="category-item" data-type="Village">
+                    <span class="filter-icon">🏘️</span>
+                    <span class="filter-label">Villages</span>
+                </label>
+                <label class="filter-toggle">
+                    <input type="checkbox" class="category-item" data-type="Local">
+                    <span class="filter-icon">🏠</span>
+                    <span class="filter-label">Local</span>
+                </label>
+                <label class="filter-toggle">
+                    <input type="checkbox" class="category-item" data-type="Camp">
+                    <span class="filter-icon">⛺</span>
+                    <span class="filter-label">Camps</span>
+                </label>
+                <label class="filter-toggle">
+                    <input type="checkbox" class="category-item" data-type="Hill">
+                    <span class="filter-icon">⛰️</span>
+                    <span class="filter-label">Hills</span>
+                </label>
+                <label class="filter-toggle">
+                    <input type="checkbox" class="category-item" data-type="RailroadStation">
+                    <span class="filter-icon">🚂</span>
+                    <span class="filter-label">Railroad Stations</span>
+                </label>
+                <label class="filter-toggle">
+                    <input type="checkbox" class="category-item" data-type="Marine">
+                    <span class="filter-icon">⚓</span>
+                    <span class="filter-label">Marine</span>
+                </label>
+                <label class="filter-toggle">
+                    <input type="checkbox" class="category-item" data-type="Ruin">
+                    <span class="filter-icon">🏚️</span>
+                    <span class="filter-label">Ruins</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Menu Dropdown -->
+    <div id="global-menu" class="menu-dropdown">
+        <a href="/selectGuildService" class="menu-item">
+            <div class="menu-item-icon">🔄</div>
+            <span class="menu-item-text">Change Server</span>
+        </a>
+        <a href="/account-settings" class="menu-item">
+            <div class="menu-item-icon">⚙️</div>
+            <span class="menu-item-text">Account Settings</span>
+        </a>
+        <div class="menu-divider"></div>
+        <a href="/auth/logout" class="menu-item">
+            <div class="menu-item-icon">🚪</div>
+            <span class="menu-item-text">Logout</span>
+        </a>
+    </div>
+
+    <!-- Left Panel -->
+    <div id="left-panel" class="floating-panel">
+        <div class="panel-header">
+            <div class="panel-title">Information</div>
+            <div class="panel-toggle" id="leftPanelToggle">−</div>
+        </div>
+        <div class="panel-content" id="leftPanelContent">
+            <div id="selection-info">
+                <p style="text-align: center; color: #8E8E93; margin-top: 40px;">
+                    Click on a map marker to view details
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel -->
+    <div id="right-panel" class="floating-panel">
+        <div class="panel-header">
+            <div class="panel-title">Actions</div>
+            <div class="panel-toggle" id="rightPanelToggle">−</div>
+        </div>
+        <div class="panel-content" id="rightPanelContent">
+            <div id="action-buttons">
+                <p style="text-align: center; color: #8E8E93; margin-top: 40px;">
+                    Select an item to see available actions
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Map Container -->
+    <div id="dashboard-container">
+        <div id="map-container">
+            <div id="map"></div>
+        </div>
+    </div>
+
+    <!-- Bottom Toolbar -->
+    <div id="bottom-toolbar">
+        <a href="/dashboard" class="toolbar-item active">
+            <div class="toolbar-icon">🗺️</div>
+            <div class="toolbar-label">Map</div>
+        </a>
+        <a href="/store" class="toolbar-item">
+            <div class="toolbar-icon">🏪</div>
+            <div class="toolbar-label">Store</div>
+        </a>
+        <a href="/quests" class="toolbar-item">
+            <div class="toolbar-icon">📜</div>
+            <div class="toolbar-label">Quests</div>
+        </a>
+        <a href="/logs" class="toolbar-item">
+            <div class="toolbar-icon">📋</div>
+            <div class="toolbar-label">Logs</div>
+        </a>
+        <a href="/spawner-queue" class="toolbar-item">
+            <div class="toolbar-icon">🔄</div>
+            <div class="toolbar-label">Queue</div>
+        </a>
+    </div>
+
+    <!-- Dashboard JavaScript -->
+    <script type="module" src="/js/dashboardMain.js"></script>
+    <script>
+        // Close all open panels/menus
+        function closeAllPanels() {
+            document.getElementById('filterPanel')?.classList.remove('show');
+            document.getElementById('global-menu')?.classList.remove('show');
+        }
+
+        // Global Menu Toggle
+        function toggleMenu() {
+            const menu = document.getElementById('global-menu');
+            const wasOpen = menu.classList.contains('show');
+            
+            // Close all other panels first
+            closeAllPanels();
+            
+            // Toggle this menu
+            if (!wasOpen) {
+                menu.classList.add('show');
+            }
+        }
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('global-menu');
+            const menuButton = document.querySelector('.menu-button');
+            
+            if (!menu.contains(e.target) && !menuButton.contains(e.target) && menu.classList.contains('show')) {
+                menu.classList.remove('show');
+            }
+            
+            const filterPanel = document.getElementById('filterPanel');
+            const filterButton = document.getElementById('filterBtn');
+            
+            if (filterPanel && !filterPanel.contains(e.target) && !filterButton.contains(e.target) && filterPanel.classList.contains('show')) {
+                filterPanel.classList.remove('show');
+            }
+        });
+
+        // Panel Toggle
+        function togglePanel(side) {
+            const panel = document.getElementById(`${side}-panel`);
+            const content = document.getElementById(`${side}PanelContent`);
+            const toggle = panel.querySelector('.panel-toggle');
+            
+            panel.classList.toggle('collapsed');
+            content.classList.toggle('hidden');
+            toggle.textContent = panel.classList.contains('collapsed') ? '+' : '−';
+        }
+
+        // Menu button handler
+        document.getElementById('menuButton')?.addEventListener('click', toggleMenu);
+
+        // Filter close button handler
+        document.getElementById('filterCloseBtn')?.addEventListener('click', () => {
+            document.getElementById('filterPanel').classList.remove('show');
+        });
+
+        // Panel toggle button handlers
+        document.getElementById('leftPanelToggle')?.addEventListener('click', () => {
+            togglePanel('left');
+        });
+
+        document.getElementById('rightPanelToggle')?.addEventListener('click', () => {
+            togglePanel('right');
+        });
+
+        // Top Control Button Handlers
+        document.getElementById('toggleLeftPanel')?.addEventListener('click', () => {
+            togglePanel('left');
+        });
+
+        document.getElementById('toggleRightPanel')?.addEventListener('click', () => {
+            togglePanel('right');
+        });
+
+        document.getElementById('zoomIn')?.addEventListener('click', () => {
+            if (window.mapInstance) {
+                window.mapInstance.map.zoomIn();
+            }
+        });
+
+        document.getElementById('zoomOut')?.addEventListener('click', () => {
+            if (window.mapInstance) {
+                window.mapInstance.map.zoomOut();
+            }
+        });
+
+        document.getElementById('mapViewToggle')?.addEventListener('click', () => {
+            if (window.mapInstance) {
+                const currentLayer = window.mapInstance.getCurrentLayer();
+                const layerKeys = Object.keys(window.mapInstance.tileLayers);
+                const currentIndex = layerKeys.findIndex(key => window.mapInstance.tileLayers[key] === currentLayer);
+                const nextIndex = (currentIndex + 1) % layerKeys.length;
+                window.mapInstance.setCurrentLayer(layerKeys[nextIndex]);
+            }
+        });
+
+        document.getElementById('filterBtn')?.addEventListener('click', () => {
+            const filterPanel = document.getElementById('filterPanel');
+            const wasOpen = filterPanel.classList.contains('show');
+            
+            // Close all other panels first
+            closeAllPanels();
+            
+            // Toggle this panel
+            if (!wasOpen) {
+                filterPanel.classList.add('show');
+            }
+        });
+
+        // Make selection info available globally
+        window.updateLeftPanel = function(data) {
+            const content = document.getElementById('selection-info');
+            content.innerHTML = '';
+            
+            for (const [label, value] of Object.entries(data)) {
+                const section = document.createElement('div');
+                section.className = 'info-section';
+                section.innerHTML = `
+                    <div class="info-label">${label}</div>
+                    <div class="info-value">${value}</div>
+                `;
+                content.appendChild(section);
+            }
+        };
+
+        // Make action buttons available globally
+        window.updateRightPanel = function(buttons) {
+            const content = document.getElementById('action-buttons');
+            content.innerHTML = '';
+            
+            buttons.forEach(btn => {
+                const button = document.createElement('button');
+                button.className = `ios-button ${btn.class || ''}`;
+                button.textContent = btn.label;
+                button.onclick = btn.action;
+                button.style.marginBottom = '12px';
+                button.style.width = '100%';
+                content.appendChild(button);
+            });
+        };
+
+        // Store session data
+        window.sessionData = {
+            guildId: '<%= guildId %>',
+            serviceId: '<%= serviceId %>',
+            mapLoc: <%= mapLoc %>,
+            user: <%- JSON.stringify(user) %>
+        };
+
+        // Suppress tile loading 404 errors in console
+        const originalConsoleError = console.error;
+        console.error = function(...args) {
+            const errorStr = args.join(' ');
+            // Suppress 404 errors for tile images
+            if (errorStr.includes('.webp') && (errorStr.includes('404') || errorStr.includes('Not Found'))) {
+                return;
+            }
+            originalConsoleError.apply(console, args);
+        };
+    </script>
+</body>
+</html>

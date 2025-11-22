@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select a Guild - JinieBot</title>
+    <link rel="stylesheet" href="/css/selectGuild.css">
+    <link rel="stylesheet" href="/css/responsive-base.css">
+</head>
+<body>
+    <!-- Background Image -->
+    <div class="background-image"></div>
+    
+    <button class="back-btn" id="backBtn" style="display: none;">Back</button>
+    
+    <div class="container">
+        <h1 class="page-title">Select Your Server</h1>
+        <p class="page-subtitle">Choose which Discord server to manage</p>
+        
+        <div class="guilds-container">
+            <!-- Navigation Arrow Left -->
+            <button class="nav-arrow nav-arrow-left" id="prevPage" style="display: none;">
+                <span>‹</span>
+            </button>
+            
+            <!-- Guild Cards Container -->
+            <div class="guild-cards-wrapper">
+                <div class="guild-cards" id="guildCards">
+                    <% guilds.forEach(guild => { %>
+                        <div class="guild-card" data-guild-id="<%= guild.guildId %>">
+                            <div class="guild-icon-container">
+                                <% if (guild.iconUrl) { %>
+                                    <img src="<%= guild.iconUrl %>" alt="<%= guild.guildName %>" class="guild-icon">
+                                <% } else { %>
+                                    <div class="guild-icon-placeholder">
+                                        <span class="guild-initial"><%= guild.guildName.charAt(0).toUpperCase() %></span>
+                                    </div>
+                                <% } %>
+                            </div>
+                            <h2 class="guild-name"><%= guild.guildName %></h2>
+                            <button type="button" class="guild-select-btn">Select Server</button>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+            
+            <!-- Navigation Arrow Right -->
+            <button class="nav-arrow nav-arrow-right" id="nextPage" style="display: none;">
+                <span>›</span>
+            </button>
+        </div>
+    </div>
+    
+    <script src="/js/selectGuild.js"></script>
+</body>
+</html>

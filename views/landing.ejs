@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JinieBot Dashboard - DayZ Server Management</title>
+    <!-- fullPage.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullPage.js/4.0.20/fullpage.min.css" crossorigin="anonymous" />
+    <link rel="stylesheet" href="/css/landing.css">
+    <link rel="stylesheet" href="/css/responsive-base.css">
+    <link rel="stylesheet" href="/css/landing-mobile.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="/images/JinieBotIcon.png" alt="JinieBot" class="logo-icon-img">
+                <span class="logo-text">JinieBot</span>
+            </div>
+            <div class="nav-links">
+                <a href="#features" data-menuanchor="features">Features</a>
+                <a href="#pricing" data-menuanchor="pricing">Pricing</a>
+                <a href="https://discord.gg/your-invite" target="_blank">Discord</a>
+                <a href="https://youtube.com/@your-channel" target="_blank">YouTube</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- fullPage.js Container -->
+    <div id="fullpage">
+        <!-- Hero Section -->
+        <section class="section hero" data-anchor="hero">
+        <div class="hero-background-image"></div>
+        <div class="hero-content">
+            <div class="frosted-panel">
+                <h1 class="hero-title-italic">Welcome to JinieBot</h1>
+                <div class="hero-buttons">
+                    <a href="/auth/login" class="btn-pill btn-pill-primary">
+                        Login with Discord
+                    </a>
+                    <a href="https://www.patreon.com/your-patreon" target="_blank" class="btn-pill btn-pill-secondary">
+                        Sign Up via Patreon
+                    </a>
+                </div>
+                <div class="hero-small-buttons">
+                    <a href="https://discord.gg/your-invite" target="_blank" class="btn-small-pill">
+                        Join Discord
+                    </a>
+                    <a href="https://youtube.com/@your-channel" target="_blank" class="btn-small-pill">
+                        Watch Tutorials
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+        <!-- Features Section -->
+        <section class="section features" data-anchor="features">
+        <div class="features-background-image"></div>
+        <div class="features-content">
+            <!-- Title -->
+            <div class="features-header">
+                <h1 class="features-main-title">Features</h1>
+                <p class="features-main-subtitle">Comprehensive tools for DayZ server management</p>
+            </div>
+            
+            <!-- Main Content Panel -->
+            <div class="features-main-panel">
+                <div class="feature-display" id="featureDisplay">
+                    <!-- Factions & Bases - 3 pages -->
+                    <div class="feature-slide active" data-feature="factions" data-page="1">
+                        <h2 class="feature-display-title">Factions and Bases - Overview</h2>
+                        <p class="feature-display-text">
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Comprehensive faction management system with territory control, member management, and alliance tracking.
+                        </p>
+                        <p class="feature-display-text">
+                            Track faction standings, manage member permissions, and monitor territorial disputes. Create complex faction hierarchies with customizable ranks and roles.
+                        </p>
+                    </div>
+                    <div class="feature-slide" data-feature="factions" data-page="2">
+                        <h2 class="feature-display-title">Base Management</h2>
+                        <p class="feature-display-text">
+                            Monitor all player bases with real-time location tracking and structure inventory. View base layouts, flag ownership, and defensive capabilities.
+                        </p>
+                        <p class="feature-display-text">
+                            Track construction progress, identify vulnerable bases, and manage raid scheduling. Complete base history with build dates and ownership changes.
+                        </p>
+                    </div>
+                    <div class="feature-slide" data-feature="factions" data-page="3">
+                        <h2 class="feature-display-title">Territory Control</h2>
+                        <p class="feature-display-text">
+                            Define faction territories on the map with custom boundaries. Track territorial conflicts, border disputes, and contested zones.
+                        </p>
+                        <p class="feature-display-text">
+                            Automated alerts for territory violations, visual map overlays showing faction control, and historical territory change tracking.
+                        </p>
+                    </div>
+                    
+                    <!-- Shops - 2 pages -->
+                    <div class="feature-slide" data-feature="shops" data-page="1">
+                        <h2 class="feature-display-title">Shop Management</h2>
+                        <p class="feature-display-text">
+                            Create and manage your in-game economy with a fully customizable shop system. Configure item categories, pricing, and stock levels.
+                        </p>
+                        <p class="feature-display-text">
+                            Track all purchases, manage player currencies, and set purchase limits per user. Real-time stock management with automatic restocking options.
+                        </p>
+                    </div>
+                    <div class="feature-slide" data-feature="shops" data-page="2">
+                        <h2 class="feature-display-title">Economy Analytics</h2>
+                        <p class="feature-display-text">
+                            Detailed transaction history and purchasing patterns. Monitor currency flow, identify popular items, and adjust pricing dynamically.
+                        </p>
+                        <p class="feature-display-text">
+                            Sales reports, revenue tracking, and player spending analysis. Configure seasonal items, limited-time offers, and special promotions.
+                        </p>
+                    </div>
+                    
+                    <!-- Management - 3 pages -->
+                    <div class="feature-slide" data-feature="management" data-page="1">
+                        <h2 class="feature-display-title">Server Management</h2>
+                        <p class="feature-display-text">
+                            Comprehensive tools for managing every aspect of your DayZ server. Real-time player monitoring, activity tracking, and performance metrics.
+                        </p>
+                        <p class="feature-display-text">
+                            View connected players, session times, and player statistics. Monitor server health, resource usage, and connection quality.
+                        </p>
+                    </div>
+                    <div class="feature-slide" data-feature="management" data-page="2">
+                        <h2 class="feature-display-title">Automation & Moderation</h2>
+                        <p class="feature-display-text">
+                            Automated moderation tools including ban management, kick controls, and warning systems. Create custom rules with automated enforcement.
+                        </p>
+                        <p class="feature-display-text">
+                            Scheduled restarts, automated backups, and event triggers. Configure whitelist management and VIP player systems.
+                        </p>
+                    </div>
+                    <div class="feature-slide" data-feature="management" data-page="3">
+                        <h2 class="feature-display-title">Analytics Dashboard</h2>
+                        <p class="feature-display-text">
+                            Detailed analytics and reporting for all server activities. Player engagement metrics, peak hours analysis, and growth tracking.
+                        </p>
+                        <p class="feature-display-text">
+                            Export reports, generate charts, and monitor long-term trends. Custom dashboards with configurable widgets and metrics.
+                        </p>
+                    </div>
+                    
+                    <!-- Quests - 2 pages -->
+                    <div class="feature-slide" data-feature="quests" data-page="1">
+                        <h2 class="feature-display-title">Quest System</h2>
+                        <p class="feature-display-text">
+                            Create engaging custom quests with multiple objectives and rewards. Design quest chains, set prerequisites, and track player progress automatically.
+                        </p>
+                        <p class="feature-display-text">
+                            Full quest template system with easy customization. Configure objectives, rewards, difficulty levels, and completion requirements.
+                        </p>
+                    </div>
+                    <div class="feature-slide" data-feature="quests" data-page="2">
+                        <h2 class="feature-display-title">Quest Tracking & Rewards</h2>
+                        <p class="feature-display-text">
+                            Monitor quest completion rates, track active quests, and view player progress. Automated reward distribution with in-game items or currency.
+                        </p>
+                        <p class="feature-display-text">
+                            Quest leaderboards, achievement systems, and special event quests. Configure daily, weekly, and seasonal quest rotations.
+                        </p>
+                    </div>
+                    
+                    <!-- Raids - 2 pages -->
+                    <div class="feature-slide" data-feature="raids" data-page="1">
+                        <h2 class="feature-display-title">Raid Tracking</h2>
+                        <p class="feature-display-text">
+                            Comprehensive raid reporting and tracking system. Monitor all raid activities including participants, locations, and outcomes.
+                        </p>
+                        <p class="feature-display-text">
+                            Track casualties, loot distribution, and raid success rates. View raid timelines and participant contributions.
+                        </p>
+                    </div>
+                    <div class="feature-slide" data-feature="raids" data-page="2">
+                        <h2 class="feature-display-title">Conflict History</h2>
+                        <p class="feature-display-text">
+                            Generate detailed raid reports with full event history. Track faction conflicts, territory battles, and warfare statistics.
+                        </p>
+                        <p class="feature-display-text">
+                            Maintain complete server warfare history with searchable archives. Identify raid patterns, active raiders, and vulnerable targets.
+                        </p>
+                    </div>
+                    
+                    <!-- Zones - 2 pages -->
+                    <div class="feature-slide" data-feature="zones" data-page="1">
+                        <h2 class="feature-display-title">Monitor Zones</h2>
+                        <p class="feature-display-text">
+                            Create custom monitoring zones with circular or polygon boundaries. Define areas of interest for tracking player movements and activities.
+                        </p>
+                        <p class="feature-display-text">
+                            Real-time notifications when players enter or exit defined zones. Configure zone-specific rules and automated event triggers.
+                        </p>
+                    </div>
+                    <div class="feature-slide" data-feature="zones" data-page="2">
+                        <h2 class="feature-display-title">Zone Management</h2>
+                        <p class="feature-display-text">
+                            Set up safe zones, PvP areas, or special event locations. Enable or disable zones dynamically based on server events.
+                        </p>
+                        <p class="feature-display-text">
+                            Track zone activity statistics, monitor player density, and configure zone-based permissions. Visual map overlays for all zones.
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Pagination controls -->
+                <div class="feature-pagination">
+                    <button class="page-nav-btn page-prev" id="pagePrev">‹</button>
+                    <div class="page-indicators" id="pageIndicators"></div>
+                    <button class="page-nav-btn page-next" id="pageNext">›</button>
+                </div>
+            </div>
+
+            <!-- Navigation Panel Container -->
+            <div class="features-nav-container">
+                <div class="features-nav-panel">
+                    <!-- Mobile feature navigation arrows -->
+                    <button class="feature-switch-btn feature-prev" id="featurePrev">‹</button>
+                
+                <!-- Mobile feature indicators -->
+                <div class="feature-indicators">
+                    <div class="feature-indicator active" data-feature="factions" data-color="#5865F2"></div>
+                    <div class="feature-indicator" data-feature="shops" data-color="#57F287"></div>
+                    <div class="feature-indicator" data-feature="management" data-color="#FEE75C"></div>
+                    <div class="feature-indicator" data-feature="quests" data-color="#EB459E"></div>
+                    <div class="feature-indicator" data-feature="raids" data-color="#ED4245"></div>
+                    <div class="feature-indicator" data-feature="zones" data-color="#00D9FF"></div>
+                </div>
+                
+                <!-- Desktop feature buttons -->
+                <button class="feature-nav-btn active" data-feature="factions">Factions & Bases</button>
+                <button class="feature-nav-btn" data-feature="shops">Shops</button>
+                <button class="feature-nav-btn" data-feature="management">Management</button>
+                <button class="feature-nav-btn" data-feature="quests">Quests</button>
+                <button class="feature-nav-btn" data-feature="raids">Raids</button>
+                <button class="feature-nav-btn" data-feature="zones">Zones</button>
+                
+                <!-- Mobile feature navigation arrows -->
+                <button class="feature-switch-btn feature-next" id="featureNext">›</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+        <!-- Pricing Section -->
+        <section class="section pricing" data-anchor="pricing">
+        <!-- Background Image -->
+        <div class="pricing-background-image"></div>
+        
+        <div class="pricing-content">
+            <div class="pricing-header">
+                <h2 class="pricing-main-title">Pricing</h2>
+                <p class="pricing-main-subtitle">Managed through Patreon</p>
+            </div>
+            
+            <div class="pricing-cards-container">
+                <!-- Free Tier -->
+                <a href="https://discord.gg/jiniebot" target="_blank" class="pricing-card-new pricing-card-link">
+                    <h3 class="pricing-card-title">Free</h3>
+                    <p class="pricing-card-description">
+                        Access to the tools and scripts in the Discord
+                    </p>
+                </a>
+
+                <!-- Basic Tier -->
+                <a href="https://www.patreon.com/JinieJZ" target="_blank" class="pricing-card-new pricing-card-link">
+                    <h3 class="pricing-card-title">Basic</h3>
+                    <div class="pricing-card-price">$5/month</div>
+                    <p class="pricing-card-description">
+                        Up to 2 servers, all features of the bot, unlimited access to all scripts in the Discord
+                    </p>
+                </a>
+
+                <!-- Plus Tier -->
+                <a href="https://www.patreon.com/JinieJZ" target="_blank" class="pricing-card-new pricing-card-link">
+                    <h3 class="pricing-card-title">Plus</h3>
+                    <div class="pricing-card-price">$10/month</div>
+                    <p class="pricing-card-description">
+                        All the features of Basic, up to 5 servers
+                    </p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+        <!-- Command Tree Section -->
+        <section class="section commands-section" data-anchor="commands">
+        <!-- Background Image -->
+        <div class="commands-background-image"></div>
+        
+        <div class="commands-content">
+            <div class="commands-header">
+                <h2 class="commands-main-title">Command Structure</h2>
+                <p class="commands-main-subtitle">Explore the bot's commands and capabilities</p>
+            </div>
+            
+            <div class="command-tree-container">
+                <div class="command-tree-scroll" id="commandTreeScroll">
+                    <div id="commandTree" class="command-tree"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+        <!-- Footer -->
+        <footer class="section footer" data-anchor="about">
+        <!-- Background Image -->
+        <div class="footer-background-image"></div>
+        
+        <div class="footer-content-new">
+            <!-- Title -->
+            <div class="footer-header">
+                <h2 class="footer-main-title">About</h2>
+                <p class="footer-main-subtitle">Learn more about JinieBot</p>
+            </div>
+            
+            <!-- Top Section: Icon, Buttons -->
+            <div class="footer-top-section">
+                <!-- Icon on Left -->
+                <div class="footer-icon-container">
+                    <img src="/images/JinieBotIcon.png" alt="JinieBot Icon" class="footer-icon-img">
+                </div>
+                
+                <!-- Action Buttons in Center -->
+                <div class="footer-buttons">
+                    <a href="mailto:jiniesfortress@gmail.com" class="footer-btn">Contact Me</a>
+                    <a href="/privacy" class="footer-btn">Privacy Policy</a>
+                    <a href="/terms" class="footer-btn">Terms of Service</a>
+                    <a href="/cookies" class="footer-btn">Cookie Policy</a>
+                </div>
+            </div>
+            
+            <!-- Banner at Bottom -->
+            <div class="footer-banner-panel">
+                <img src="/images/landingpage/lastpage.png" alt="JinieBot" class="footer-banner-img">
+            </div>
+            
+            <!-- Copyright -->
+            <div class="footer-copyright">
+                <p>&copy; 2025 JinieBot. All rights reserved.</p>
+                <p>DayZ is a trademark of Bohemia Interactive.</p>
+            </div>
+        </div>
+        </footer>
+    </div>
+
+    <!-- fullPage.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullPage.js/4.0.20/fullpage.min.js" crossorigin="anonymous"></script>
+    <script src="/js/pages/landing.js"></script>
+</body>
+</html>
