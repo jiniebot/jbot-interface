@@ -139,11 +139,20 @@
 
     <!-- Global Menu Dropdown -->
     <div id="global-menu" class="menu-dropdown">
-        <a href="/selectGuildService" class="menu-item">
+        <a href="/dashboard" class="menu-item" id="menuMapDashboard">
+            <div class="menu-item-icon">🗺️</div>
+            <span class="menu-item-text">Map Dashboard</span>
+        </a>
+        <a href="/dashboard/store" class="menu-item" id="menuStoreManagement">
+            <div class="menu-item-icon">🛒</div>
+            <span class="menu-item-text">Store Management</span>
+        </a>
+        <div class="menu-divider"></div>
+        <a href="/selectGuildService" class="menu-item" id="menuChangeServer">
             <div class="menu-item-icon">🔄</div>
             <span class="menu-item-text">Change Server</span>
         </a>
-        <a href="/account-settings" class="menu-item">
+        <a href="/settings" class="menu-item" id="menuAccountSettings">
             <div class="menu-item-icon">⚙️</div>
             <span class="menu-item-text">Account Settings</span>
         </a>
@@ -197,8 +206,8 @@
             <div class="toolbar-icon">🗺️</div>
             <div class="toolbar-label">Map</div>
         </a>
-        <a href="/store" class="toolbar-item">
-            <div class="toolbar-icon">🏪</div>
+        <a href="/dashboard/store" class="toolbar-item">
+            <div class="toolbar-icon">🛒</div>
             <div class="toolbar-label">Store</div>
         </a>
         <a href="/quests" class="toolbar-item">
@@ -218,56 +227,115 @@
     <!-- Dashboard JavaScript -->
     <script type="module" src="/js/dashboardMain.js"></script>
     <script>
-        // Close all open panels/menus
-        function closeAllPanels() {
-            document.getElementById('filterPanel')?.classList.remove('show');
-            document.getElementById('global-menu')?.classList.remove('show');
+        // Side-specific close helpers: ensure only one UI element per side is open
+        function closeLeftSidePanels() {
+            // Left side: either the floating left panel or the filter panel
+            const filter = document.getElementById('filterPanel');
+            if (filter) filter.classList.remove('show');
+
+            const leftPanel = document.getElementById('left-panel');
+            if (leftPanel && !leftPanel.classList.contains('collapsed')) {
+                leftPanel.classList.add('collapsed');
+                document.getElementById('leftPanelContent')?.classList.add('hidden');
+                leftPanel.querySelector('.panel-toggle').textContent = '+';
+            }
         }
 
-        // Global Menu Toggle
+        function closeRightSidePanels() {
+            // Right side: either the floating right panel or the global menu
+            const menu = document.getElementById('global-menu');
+            if (menu) menu.classList.remove('show');
+
+            const rightPanel = document.getElementById('right-panel');
+            if (rightPanel && !rightPanel.classList.contains('collapsed')) {
+                rightPanel.classList.add('collapsed');
+                document.getElementById('rightPanelContent')?.classList.add('hidden');
+                rightPanel.querySelector('.panel-toggle').textContent = '+';
+            }
+        }
+
+        // Global Menu Toggle (right side). Only one right-side menu visible at a time.
+        // Align the top-right corner of the global menu with the top-right corner of the actions (right) panel.
         function toggleMenu() {
             const menu = document.getElementById('global-menu');
             const wasOpen = menu.classList.contains('show');
-            
-            // Close all other panels first
-            closeAllPanels();
-            
-            // Toggle this menu
+
+            // Close other right-side UI first
+            closeRightSidePanels();
+
+            // Toggle this menu and position it aligned to the right panel's top-right corner
             if (!wasOpen) {
+                // Temporarily show so offsetWidth is measurable
                 menu.classList.add('show');
+
+                try {
+                    const rightPanel = document.getElementById('right-panel');
+                    if (rightPanel) {
+                        const rect = rightPanel.getBoundingClientRect();
+                        // Set menu top to match panel top, and right to match panel right
+                        const top = Math.max(8, rect.top);
+                        const right = Math.max(8, window.innerWidth - rect.right);
+
+                        menu.style.position = 'fixed';
+                        menu.style.top = `${top}px`;
+                        menu.style.right = `${right}px`;
+                        menu.style.left = 'auto';
+                    }
+                } catch (err) {
+                    // If anything fails, leave default CSS positioning
+                }
             }
         }
 
-        // Close menu when clicking outside
+
+        // Close menus/panels when clicking outside (respecting side separation)
         document.addEventListener('click', (e) => {
             const menu = document.getElementById('global-menu');
             const menuButton = document.querySelector('.menu-button');
-            
-            if (!menu.contains(e.target) && !menuButton.contains(e.target) && menu.classList.contains('show')) {
+            if (menu && !menu.contains(e.target) && !menuButton.contains(e.target) && menu.classList.contains('show')) {
                 menu.classList.remove('show');
             }
-            
+
             const filterPanel = document.getElementById('filterPanel');
             const filterButton = document.getElementById('filterBtn');
-            
             if (filterPanel && !filterPanel.contains(e.target) && !filterButton.contains(e.target) && filterPanel.classList.contains('show')) {
                 filterPanel.classList.remove('show');
             }
         });
 
-        // Panel Toggle
+        // Prevent clicks inside the global menu from bubbling to document (which closes menus)
+        document.getElementById('global-menu')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        // Panel Toggle - when opening a panel, close the corresponding side's other menus
         function togglePanel(side) {
             const panel = document.getElementById(`${side}-panel`);
             const content = document.getElementById(`${side}PanelContent`);
             const toggle = panel.querySelector('.panel-toggle');
-            
+            const wasCollapsed = panel.classList.contains('collapsed');
+
+            // If we're about to open this panel, close other side-specific UI
+            if (wasCollapsed) {
+                if (side === 'left') {
+                    // opening left panel -> close filter
+                    document.getElementById('filterPanel')?.classList.remove('show');
+                } else if (side === 'right') {
+                    // opening right panel -> close global menu
+                    document.getElementById('global-menu')?.classList.remove('show');
+                }
+            }
+
             panel.classList.toggle('collapsed');
             content.classList.toggle('hidden');
             toggle.textContent = panel.classList.contains('collapsed') ? '+' : '−';
         }
 
-        // Menu button handler
-        document.getElementById('menuButton')?.addEventListener('click', toggleMenu);
+        // Menu button handler (right side)
+        document.getElementById('menuButton')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleMenu();
+        });
 
         // Filter close button handler
         document.getElementById('filterCloseBtn')?.addEventListener('click', () => {
@@ -314,13 +382,15 @@
             }
         });
 
-        document.getElementById('filterBtn')?.addEventListener('click', () => {
+        // Filter button handler (left side)
+        document.getElementById('filterBtn')?.addEventListener('click', (e) => {
+            e.stopPropagation();
             const filterPanel = document.getElementById('filterPanel');
             const wasOpen = filterPanel.classList.contains('show');
-            
-            // Close all other panels first
-            closeAllPanels();
-            
+
+            // Close left side UI (left panel) before opening filter
+            closeLeftSidePanels();
+
             // Toggle this panel
             if (!wasOpen) {
                 filterPanel.classList.add('show');

@@ -66,6 +66,38 @@ let activeObjClusterGroup = L.layerGroup();
   await loadActiveObjSps(map, activeObjClusterGroup);
 
   // Layer toggles are now handled by filter panel checkboxes in dashboard-new.ejs
+  // Wire top-level filter checkboxes (recent players, bases, monitor zones, spawned objects)
+  document.getElementById('toggleRecentPlayers')?.addEventListener('change', (e) => {
+    if (e.target.checked) {
+      if (!map.hasLayer(recentPlayersLayer)) map.addLayer(recentPlayersLayer);
+    } else {
+      if (map.hasLayer(recentPlayersLayer)) map.removeLayer(recentPlayersLayer);
+    }
+  });
+
+  document.getElementById('toggleBases')?.addEventListener('change', (e) => {
+    if (e.target.checked) {
+      if (!map.hasLayer(baseClusterGroup)) map.addLayer(baseClusterGroup);
+    } else {
+      if (map.hasLayer(baseClusterGroup)) map.removeLayer(baseClusterGroup);
+    }
+  });
+
+  document.getElementById('toggleMonitorZones')?.addEventListener('change', (e) => {
+    if (e.target.checked) {
+      if (!map.hasLayer(monitorZonesLayer)) map.addLayer(monitorZonesLayer);
+    } else {
+      if (map.hasLayer(monitorZonesLayer)) map.removeLayer(monitorZonesLayer);
+    }
+  });
+
+  document.getElementById('toggleActiveObjs')?.addEventListener('change', (e) => {
+    if (e.target.checked) {
+      if (!map.hasLayer(activeObjClusterGroup)) map.addLayer(activeObjClusterGroup);
+    } else {
+      if (map.hasLayer(activeObjClusterGroup)) map.removeLayer(activeObjClusterGroup);
+    }
+  });
 })();
 
 // Old loader functions removed - now using standardized dataLoader.js module

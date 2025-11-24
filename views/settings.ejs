@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Settings - JinieBot</title>
+    <link rel="stylesheet" href="/css/dashboard-ios.css">
+    <link rel="stylesheet" href="/css/responsive-base.css">
+    <style>
+      /* Override external CSS with higher specificity */
+      .settings-page #initialPanels.settings-grid { 
+        display: grid !important; 
+        grid-template-columns: 1fr 1fr 1fr !important; 
+        gap: 16px; 
+        padding: 20px; 
+        align-items: start; 
+      }
+      .settings-page #initialPanels .settings-card { 
+        background: rgba(255,255,255,0.04); 
+        border: 1px solid rgba(255,255,255,0.06); 
+        padding: 16px; 
+        border-radius: 10px; 
+        min-height: 400px; 
+        grid-column: span 1 !important;
+      }
+      .settings-page .settings-card h3 { margin-bottom: 12px; font-size: 18px; font-weight: 700; }
+      pre.json { background: rgba(0,0,0,0.25); padding: 8px; border-radius: 6px; overflow: auto; max-height: 420px; }
+      .settings-page .settings-card.full-width { grid-column: 1 / -1 !important; }
+      /* Editor panels container - NUCLEAR HIDING: multiple layers of protection */
+      #editorPanels { 
+        display: none !important;
+        position: fixed !important;
+        left: -99999px !important;
+        top: -99999px !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        width: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
+        z-index: -9999 !important;
+        clip: rect(0,0,0,0) !important;
+      }
+      /* Hide all children too */
+      #editorPanels * {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+      }
+      #editorPanels.active {
+        display: block !important;
+        position: relative !important;
+        left: auto !important;
+        top: auto !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        width: auto !important;
+        height: auto !important;
+        padding: 0 20px 20px 20px !important;
+        z-index: 1 !important;
+        clip: auto !important;
+      }
+      /* Re-enable children when active */
+      #editorPanels.active * {
+        display: revert !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+      }
+      #editorPanels .settings-grid { 
+        padding: 0; 
+        grid-template-columns: 1fr !important;
+      }
+      /* Ensure all editor cards are hidden by default - use ID selectors for maximum specificity */
+      #rolesCard,
+      #rewardCard,
+      #optionsCard,
+      #channelLinksCard,
+      #categoryLinksCard {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        position: absolute !important;
+        left: -99999px !important;
+      }
+      #rolesCard.active,
+      #rewardCard.active,
+      #optionsCard.active,
+      #channelLinksCard.active,
+      #categoryLinksCard.active {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: relative !important;
+        left: auto !important;
+      }
+      /* highlight for unlinked or missing channel/category */
+      .link-warning { background: rgba(255,149,0,0.12) !important; box-shadow: inset 0 0 0 1px rgba(255,149,0,0.06); }
+      /* server info grid improvements */
+      .info-grid { display: flex; flex-direction: column; gap: 10px; }
+      .info-row { display: flex; justify-content: space-between; padding: 8px 12px; background: rgba(255,255,255,0.02); border-radius: 8px; }
+      .info-row .info-label { font-size: 12px; font-weight: 600; opacity: 0.7; }
+      .info-row .info-value { font-size: 14px; font-weight: 500; text-align: right; }
+      /* manage settings button text centering */
+      .manage-settings-grid { display: flex; flex-direction: column; gap: 8px; }
+      .manage-settings-grid .icon-button { text-align: center; justify-content: center; }
+      /* service status indicator */
+      .service-status { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; }
+      .service-status.stopped { background: #FF3B30; box-shadow: 0 0 4px rgba(255,59,48,0.6); }
+      .service-status.restarting { background: #FF9500; box-shadow: 0 0 4px rgba(255,149,0,0.6); }
+      .service-status.started { background: #4CD964; box-shadow: 0 0 4px rgba(76,217,100,0.6); }
+      /* service item styling */
+      .service-item { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.02); display: flex; align-items: center; }
+      .service-item:last-child { border-bottom: none; }
+      .service-item-content { flex: 1; }
+      .service-item-name { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+      .service-item-meta { color: var(--text-gray); font-size: 12px; }
+    </style>
+</head>
+<body class="settings-page">
+  <div class="settings-background"></div>
+  <div class="settings-container">
+  <div id="top-controls">
+    <div class="control-group left-controls">
+      <button class="control-btn" id="backToDashboard">←</button>
+    </div>
+    <div class="control-group center-controls"><h2 style="color:white">Service Settings</h2></div>
+    <div class="control-group right-controls">
+      <button class="control-btn menu-button" id="menuButton"><span>⋯</span></button>
+    </div>
+  </div>
+
+  <div style="height:80px"></div>
+
+  <div class="settings-grid" id="initialPanels">
+    <div class="settings-card" id="serverInfoPanel">
+      <h3>Server Info</h3>
+      <% if (service && service.ServerInfo) { %>
+        <div class="info-grid">
+          <div class="info-row"><div class="info-label">Server Name</div><div class="info-value"><%= service.ServerInfo.server_name %></div></div>
+          <div class="info-row"><div class="info-label">Platform</div><div class="info-value"><%= service.ServerInfo.platform %></div></div>
+          <div class="info-row"><div class="info-label">Region</div><div class="info-value"><%= service.ServerInfo.region %></div></div>
+          <div class="info-row"><div class="info-label">Players</div><div class="info-value"><%= service.ServerInfo.PlayersOnline %> / <%= service.ServerInfo.MaxPlayers %></div></div>
+          <div class="info-row"><div class="info-label">IP</div><div class="info-value"><%= service.ServerInfo.ip || 'N/A' %>:<%= service.ServerInfo.query_port || '' %></div></div>
+          <div class="info-row"><div class="info-label">Last Restart</div><div class="info-value"><%= service.ServerInfo.LastRestart || service.ServerInfo.LastRestartISO || 'N/A' %></div></div>
+          <div class="info-row"><div class="info-label">Subscription</div><div class="info-value"><%= service.ServerInfo.subscriptionStatus %> / <%= service.ServerInfo.subscriptionType %></div></div>
+          <div class="info-row"><div class="info-label">Join Date</div><div class="info-value"><%= service.ServerInfo.joinDate ? new Date(service.ServerInfo.joinDate.$date || service.ServerInfo.joinDate).toLocaleString() : 'N/A' %></div></div>
+        </div>
+      <% } else { %>
+        <p style="color:var(--text-gray)">No ServerInfo available for this service.</p>
+      <% } %>
+    </div>
+
+    <div class="settings-card" id="pickerPanel">
+      <h3>Manage Settings</h3>
+      <p style="color:var(--text-gray); margin-bottom:12px; font-size:13px;">Choose a section to edit:</p>
+      <div class="manage-settings-grid">
+        <button class="icon-button" data-edit="roles">Edit Roles</button>
+        <button class="icon-button" data-edit="rewards">Edit Rewards</button>
+        <button class="icon-button" data-edit="options">Edit Options</button>
+        <button class="icon-button" data-edit="channels">Edit Channels</button>
+        <button class="icon-button" data-edit="categories">Edit Categories</button>
+      </div>
+    </div>
+
+    <div class="settings-card" id="servicesSummaryPanel">
+      <h3>All Services</h3>
+      <% if (allServices && allServices.length) { %>
+        <div style="display: flex; flex-direction: column; gap: 0;">
+          <% allServices.forEach(function(s) { 
+            // Calculate status based on LastHealthyAtISO
+            let statusClass = 'stopped'; // default red
+            const lastHealthyAt = s.ServerInfo?.LastHealthyAtISO || s.ServerInfo?.LastHealthyAt;
+            if (lastHealthyAt) {
+              const lastHealthyDate = new Date(lastHealthyAt);
+              const now = new Date();
+              const hoursSince = (now - lastHealthyDate) / (1000 * 60 * 60);
+              if (hoursSince <= 1) statusClass = 'started'; // green
+              else if (hoursSince <= 6) statusClass = 'restarting'; // orange
+              else statusClass = 'stopped'; // red
+            }
+          %>
+            <div class="service-item">
+              <span class="service-status <%= statusClass %>"></span>
+              <div class="service-item-content">
+                <div class="service-item-name"><%= s.ServerInfo && s.ServerInfo.server_name ? s.ServerInfo.server_name : 'Unnamed' %></div>
+                <div class="service-item-meta">Platform: <%= s.ServerInfo?.platform || 'N/A' %> — ID: <%= s.ServerInfo?.nitrado_service_id || 'N/A' %></div>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <p style="color:var(--text-gray)">No services found for this guild.</p>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Editor Panels Container (separate from grid) -->
+  <div id="editorPanels">
+    <div class="settings-grid">
+    <div class="settings-card full-width" id="rolesCard">
+      <h3>Roles (select from available Discord roles)</h3>
+      <form id="rolesForm">
+        <div class="ios-card" id="rolesList">
+          <% const rolesObj = (service && service.Options && service.Options.Roles) || {};
+             const availableRoles = (typeof rolesList !== 'undefined' && Array.isArray(rolesList)) ? rolesList : [];
+             Object.entries(rolesObj).forEach(function([k,v]) { %>
+            <div class="kv-row" data-key="<%= k %>">
+              <div class="kv-key"><label class="info-label"><%= k %></label></div>
+              <div class="kv-val">
+                <select class="ios-input customize-select" name="value">
+                  <% availableRoles.forEach(function(r) { %>
+                    <option value="<%= r.name %>" <%= (r.name === v || String(r.id) === String(v)) ? 'selected' : '' %>><%= r.name %></option>
+                  <% }) %>
+                </select>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+        <div class="card-actions">
+          <button type="submit" class="ios-button success">Save Roles</button>
+          <span class="save-status" id="rolesStatus"></span>
+        </div>
+      </form>
+    </div>
+
+    <div class="settings-card full-width" id="rewardCard">
+      <h3>Quest Reward Settings (numbers only)</h3>
+      <form id="rewardForm">
+        <div class="ios-card" id="rewardList">
+          <% const reward = (service && service.Options && service.Options.RewardSettings) || (service && service.Options && service.Options.Options && service.Options.Options.RewardSettings) || {};
+             Object.entries(reward).forEach(function([k,v]) { %>
+            <div class="kv-row" data-key="<%= k %>">
+              <div class="kv-key"><label class="info-label"><%= k %></label></div>
+              <div class="kv-val"><input type="number" step="1" min="0" class="ios-input" name="value" value="<%= typeof v === 'object' && v.value !== undefined ? v.value : v %>" /></div>
+            </div>
+          <% }) %>
+        </div>
+        <div class="card-actions">
+          <button type="submit" class="ios-button success">Save Rewards</button>
+          <span class="save-status" id="rewardStatus"></span>
+        </div>
+      </form>
+  </div>
+
+    <div class="settings-card full-width" id="optionsCard">
+      <h3>General Options</h3>
+      <form id="optionsForm">
+        <div class="ios-card" id="optionsList" style="max-height:420px; overflow:auto;">
+          <% const opts = (service && service.Options && service.Options.Options) || (service && service.Options && service.Options) || {};
+             const optionCategories = {
+               "Startup Settings": [
+                 "Starting_Balance",
+                 "PlayerRoleOnLink",
+                 "WhitelistOnLink",
+                 "Daily_Amount",
+                 "Max_Alts",
+                 "Money_Per_Kill",
+                 "Money_On_Kill",
+                 "FriendlyKillCost",
+                 "PayOnPingAmt",
+                 "PayOnPing",
+                 "SuicidesCountAsDeaths"
+               ],
+               "Robbery Settings": [
+                 "Robbery_Max_Distance",
+                 "Robbery_Min_Percentage",
+                 "Robbery_Max_Percentage"
+               ],
+               "Faction Settings": [
+                 "Max_Base_Radar_Size",
+                 "factionMembersForLevel1",
+                 "factionMembersForLevel2",
+                 "factionMembersForLevel3",
+                 "AllowDupeFlags",
+                 "MinFactionMembers",
+                 "PeriodUntilFactionDeletion",
+                 "AutoDeleteSmallFactions",
+                 "MaxBasesPerFaction"
+               ],
+               "Faction Radar & UAV Settings": [
+                 "UAV_Range",
+                 "UAV_Duration",
+                 "DefaultBaseRadarSize",
+                 "BaseRadar_UpgradeCost"
+               ],
+               "Economy Settings": [
+                 "Gambling_Win_Percentage",
+                 "MaxBet",
+                 "Beg_Success_Percentage",
+                 "Beg_Cooldown_Time",
+                 "Beg_Min_Reward",
+                 "Beg_Max_Reward",
+                 "GamblingCoolDown"
+               ],
+               "Bot Settings": [
+                 "SendRestartMessage",
+                 "RestartMessage",
+                 "ModeratorsCanBan",
+                 "ModeratorsCanPrioritize",
+                 "ModeratorsCanWhitelist",
+                 "ModsCanTeleport",
+                 "TradersCanBan",
+                 "WelcomeMessage",
+                 "SendWelcomeMessage",
+                 "MinutesBetweenRestarts",
+                 "SendQueueUpdates",
+                 "ShowTeleportLocations",
+                 "MaxClosedTickets"
+               ],
+               "Zone Settings": [
+                 "KillInSafeZoneBanDuration",
+                 "KillInTraderZoneBanDuration",
+                 "ForbiddenZoneBanDuration",
+                 "BanOnKillOutsidePVPZone",
+                 "BanOnEnterForbiddenZone",
+                 "BanOnEnterTraderZone"
+               ],
+               "Event Settings": ["ChernoShipMove", "ChernoVehiclePartsConvoys"],
+               "Raid Settings": [
+                 "RaidDefaultLengthMinutes",
+                 "RaidCooldown",
+                 "TimeToCaptureBase",
+                 "TimeToReclaimBase",
+                 "TimeToHoldBase"
+               ],
+               "Bounty Settings": [
+                 "BountyEnabled",
+                 "BountyShowSpecificLocations",
+                 "BountyPricePerHour",
+                 "BountyMaxDuration",
+                 "BountyMinDuration",
+                 "BountyCooldown"
+               ],
+               "Quest Settings": ["maxQuests"]
+             };
+             const rendered = {};
+             // render categories in order
+             Object.entries(optionCategories).forEach(function([catName, keys]) {
+               // gather keys that exist in opts
+               const present = keys.filter(k => Object.prototype.hasOwnProperty.call(opts, k));
+               if (!present.length) return;
+          %>
+            <div style="margin-bottom:12px"><div class="info-label" style="margin-bottom:8px"><%= catName %></div>
+              <% present.forEach(function(k) { rendered[k]=true; var v = opts[k]; %>
+                <div class="kv-row" data-key="<%= k %>">
+                  <div class="kv-key"><label class="info-label"><%= k %></label></div>
+                  <div class="kv-val">
+                    <% if (typeof v === 'boolean') { %>
+                      <select class="ios-input customize-select" name="value">
+                        <option value="true" <%= v ? 'selected' : '' %>>True</option>
+                        <option value="false" <%= !v ? 'selected' : '' %>>False</option>
+                      </select>
+                    <% } else if (typeof v === 'number') { %>
+                      <input type="number" class="ios-input" name="value" value="<%= v %>" />
+                    <% } else { %>
+                      <input type="text" class="ios-input" name="value" value="<%= v %>" />
+                    <% } %>
+                  </div>
+                </div>
+              <% }) %>
+            </div>
+          <% }) %>
+
+       <% // now render remaining keys not in optionCategories
+         const otherKeys = Object.keys(opts).filter(k => !rendered[k]);
+             if (otherKeys.length) { %>
+               <div style="margin-top:6px"><div class="info-label" style="margin-bottom:8px">Other Settings</div>
+               <% otherKeys.forEach(function(k) { var v = opts[k]; %>
+                 <div class="kv-row" data-key="<%= k %>">
+                   <div class="kv-key"><label class="info-label"><%= k %></label></div>
+                   <div class="kv-val">
+                     <% if (typeof v === 'boolean') { %>
+                       <select class="ios-input customize-select" name="value">
+                         <option value="true" <%= v ? 'selected' : '' %>>True</option>
+                         <option value="false" <%= !v ? 'selected' : '' %>>False</option>
+                       </select>
+                     <% } else if (typeof v === 'number') { %>
+                       <input type="number" class="ios-input" name="value" value="<%= v %>" />
+                     <% } else { %>
+                       <input type="text" class="ios-input" name="value" value="<%= v %>" />
+                     <% } %>
+                   </div>
+                 </div>
+               <% }) %>
+               </div>
+          <% } %>
+        </div>
+        <div class="card-actions">
+          <button type="submit" class="ios-button success">Save Options</button>
+          <span class="save-status" id="optionsStatus"></span>
+        </div>
+      </form>
+    </div>
+
+    <div class="settings-card full-width" id="channelLinksCard">
+      <h3>Channel Links</h3>
+      <% const availableChannels = (typeof channelsList !== 'undefined' && Array.isArray(channelsList)) ? channelsList : [];
+         if (service && service.Discord_Channels) { %>
+        <form id="channelsForm">
+          <div class="ios-card">
+            <% Object.entries(service.Discord_Channels).forEach(function([sectionKey, sectionVal]) { %>
+              <h4 style="margin-top:8px"><%= sectionKey %></h4>
+              <% Object.entries(sectionVal).forEach(function([k,v]) { %>
+                <% if (typeof v === 'object') {
+                     const found = availableChannels.find(c => String(c.id) === String(v.channelID)); %>
+                  <div class="kv-row" data-section="<%= sectionKey %>" data-key="<%= k %>">
+                    <div class="kv-key"><label class="info-label"><%= k %></label></div>
+                    <div class="kv-val">
+                      <select class="ios-input customize-select" name="channel_select">
+                        <option value="">-- Unlinked --</option>
+                        <% availableChannels.forEach(function(ch) { %>
+                          <option value="<%= ch.id %>" <%= (String(ch.id) === String(v.channelID)) ? 'selected' : '' %>><%= ch.name %> (<%= ch.id %>)</option>
+                        <% }) %>
+                      </select>
+                          <% const isWarn = (!found || !v.channelID); %>
+                          <% if (isWarn) { %>
+                            <span style="color:var(--warning-orange); margin-left:8px; font-weight:700">Unlinked / Missing</span>
+                          <% } %>
+                    </div>
+                      </div>
+                      <script>/* mark row with warning class server-side fallback */</script>
+                    </div>
+                <% } %>
+              <% }) %>
+            <% }) %>
+          </div>
+          <div class="card-actions">
+            <button type="submit" class="ios-button success">Save Channel Links</button>
+            <span class="save-status" id="channelsStatus"></span>
+          </div>
+        </form>
+      <% } else { %>
+        <p style="color:var(--text-gray)">No Discord channels configured for this service.</p>
+      <% } %>
+    </div>
+
+    <div class="settings-card full-width" id="categoryLinksCard">
+      <h3>Category Links</h3>
+      <% const availableChannelsForCategories = (typeof channelsList !== 'undefined' && Array.isArray(channelsList)) ? channelsList : [];
+         const categories = availableChannelsForCategories.filter(c => c.type === 4); %>
+      <% if (service && service.Discord_Categories) { %>
+        <form id="categoriesForm">
+          <div class="ios-card">
+            <% Object.entries(service.Discord_Categories).forEach(function([k,v]) { %>
+              <% const foundCat = categories.find(c => String(c.id) === String(v.channelID)); %>
+              <div class="kv-row" data-key="<%= k %>">
+                <div class="kv-key"><label class="info-label"><%= k %></label></div>
+                <div class="kv-val">
+                  <select class="ios-input customize-select" name="category_select">
+                    <option value="">-- Unlinked --</option>
+                    <% categories.forEach(function(cat) { %>
+                      <option value="<%= cat.id %>" <%= (String(cat.id) === String(v.channelID)) ? 'selected' : '' %>><%= cat.name %> (<%= cat.id %>)</option>
+                    <% }) %>
+                  </select>
+                  <% const isCatWarn = (!foundCat || !v.channelID); %>
+                  <% if (isCatWarn) { %>
+                    <span style="color:var(--warning-orange); margin-left:8px; font-weight:700">Unlinked / Missing</span>
+                  <% } %>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+          <div class="card-actions">
+            <button type="submit" class="ios-button success">Save Category Links</button>
+            <span class="save-status" id="categoriesStatus"></span>
+          </div>
+        </form>
+      <% } else { %>
+        <p style="color:var(--text-gray)">No Discord categories configured for this service.</p>
+      <% } %>
+    </div>
+    </div> <!-- settings-grid -->
+  </div> <!-- editorPanels -->
+
+  </div> <!-- settings-container -->
+
+  <script>
+    // back button: if in editor, go back to overview; otherwise go to dashboard
+    document.getElementById('backToDashboard')?.addEventListener('click', () => {
+      if (document.body.dataset.editor === 'true') return showOverview();
+      window.location.href = '/dashboard';
+    });
+    document.getElementById('menuButton')?.addEventListener('click', () => { window.location.href = '/dashboard'; });
+
+    // Form submit handlers (roles, rewards, options)
+    async function submitFormTyped(formEl, statusEl, sectionName) {
+      statusEl.textContent = 'Saving...';
+      try {
+        const rows = Array.from(formEl.querySelectorAll('.kv-row'));
+        const payload = {};
+
+        for (const r of rows) {
+          const key = r.dataset.key || (r.querySelector('.kv-key input') && r.querySelector('.kv-key input').value) || r.querySelector('.kv-key')?.textContent?.trim();
+          if (!key) continue;
+          const input = r.querySelector('[name="value"]');
+          if (!input) continue;
+          let val = input.value;
+
+          if (sectionName === 'roles') {
+            // roles send role name (string)
+            payload[key] = String(val);
+          } else if (sectionName === 'rewardSettings') {
+            // must be numbers
+            if (val === '') { statusEl.textContent = 'All reward fields must be numbers'; return; }
+            const num = Number(val);
+            if (Number.isNaN(num)) { statusEl.textContent = 'Reward values must be numeric'; return; }
+            payload[key] = num;
+          } else if (sectionName === 'options') {
+            // determine type from select/input
+            if (input.tagName === 'SELECT') {
+              // boolean select
+              payload[key] = (input.value === 'true');
+            } else if (input.type === 'number') {
+              const num = Number(input.value);
+              if (Number.isNaN(num)) { statusEl.textContent = 'Option values must be numbers'; return; }
+              payload[key] = num;
+            } else {
+              payload[key] = input.value;
+            }
+          }
+        }
+
+        const body = {};
+        if (sectionName === 'roles') body.roles = payload;
+        if (sectionName === 'rewardSettings') body.rewardSettings = payload;
+        if (sectionName === 'options') body.options = payload;
+
+        const res = await fetch('/settings/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json && json.error ? json.error : 'Save failed');
+        statusEl.textContent = 'Saved';
+        setTimeout(() => statusEl.textContent = '', 2000);
+      } catch (err) {
+        statusEl.textContent = 'Error: ' + (err.message || err);
+        console.error('Save error', err);
+      }
+    }
+
+    document.getElementById('rolesForm')?.addEventListener('submit', function (e) {
+      e.preventDefault();
+      submitFormTyped(this, document.getElementById('rolesStatus'), 'roles');
+    });
+
+    document.getElementById('rewardForm')?.addEventListener('submit', function (e) {
+      e.preventDefault();
+      submitFormTyped(this, document.getElementById('rewardStatus'), 'rewardSettings');
+    });
+
+    document.getElementById('optionsForm')?.addEventListener('submit', function (e) {
+      e.preventDefault();
+      submitFormTyped(this, document.getElementById('optionsStatus'), 'options');
+    });
+
+    // Channels form handler
+    document.getElementById('channelsForm')?.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const statusEl = document.getElementById('channelsStatus');
+      statusEl.textContent = 'Saving...';
+      try {
+        const rows = Array.from(this.querySelectorAll('.kv-row'));
+        const payload = {};
+        for (const r of rows) {
+          const section = r.dataset.section;
+          const key = r.dataset.key;
+          const sel = r.querySelector('select[name="channel_select"]');
+          const val = sel ? sel.value : '';
+          payload[section] = payload[section] || {};
+          payload[section][key] = val || '';
+        }
+
+        const res = await fetch('/settings/update-discord-links', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ channels: payload })
+        });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json && json.error ? json.error : 'Save failed');
+        statusEl.textContent = 'Saved';
+        setTimeout(() => statusEl.textContent = '', 2000);
+      } catch (err) {
+        statusEl.textContent = 'Error: ' + (err.message || err);
+        console.error('Channels save error', err);
+      }
+    });
+
+    // Categories form handler
+    document.getElementById('categoriesForm')?.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const statusEl = document.getElementById('categoriesStatus');
+      statusEl.textContent = 'Saving...';
+      try {
+        const rows = Array.from(this.querySelectorAll('.kv-row'));
+        const payload = {};
+        for (const r of rows) {
+          const key = r.dataset.key;
+          const sel = r.querySelector('select[name="category_select"]');
+          const val = sel ? sel.value : '';
+          payload[key] = val || '';
+        }
+
+        const res = await fetch('/settings/update-discord-links', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ categories: payload })
+        });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json && json.error ? json.error : 'Save failed');
+        statusEl.textContent = 'Saved';
+        setTimeout(() => statusEl.textContent = '', 2000);
+      } catch (err) {
+        statusEl.textContent = 'Error: ' + (err.message || err);
+        console.error('Categories save error', err);
+      }
+    });
+
+    // Replace native selects with a styled in-page dropdown to avoid native OS white popups (Edge)
+    // This function will be called when panels are shown, not immediately
+    function replaceSelects() {
+      const selects = Array.from(document.querySelectorAll('select.customize-select'));
+      if (!selects.length) return;
+
+      // Close any open list when clicking outside
+      document.addEventListener('click', (ev) => {
+        document.querySelectorAll('.custom-select-list.show').forEach(l => {
+          if (!l.contains(ev.target)) l.classList.remove('show');
+        });
+      });
+
+      selects.forEach(sel => {
+        // ensure we haven't already wrapped it
+        if (sel.closest('.custom-select')) return;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'custom-select';
+        const display = document.createElement('div');
+        display.className = 'custom-select-display';
+        const list = document.createElement('div');
+        list.className = 'custom-select-list';
+
+        // populate list and determine selected text
+        let selectedText = '';
+        Array.from(sel.options).forEach(opt => {
+          const item = document.createElement('div');
+          item.className = 'custom-select-item';
+          item.textContent = opt.textContent || opt.label || opt.value;
+          item.dataset.value = opt.value;
+          if (opt.selected) selectedText = item.textContent;
+          item.addEventListener('click', (e) => {
+            sel.value = item.dataset.value;
+            // trigger change on native select
+            sel.dispatchEvent(new Event('change', { bubbles: true }));
+            display.textContent = item.textContent;
+            list.classList.remove('show');
+          });
+          list.appendChild(item);
+        });
+
+        if (!selectedText) selectedText = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : '';
+        display.textContent = selectedText || (sel.options[0] && sel.options[0].text) || '';
+
+        display.addEventListener('click', (e) => {
+          e.stopPropagation();
+          // toggle
+          const already = list.classList.contains('show');
+          document.querySelectorAll('.custom-select-list.show').forEach(l => l.classList.remove('show'));
+          if (!already) list.classList.add('show');
+        });
+
+        // Insert wrapper and move native select inside (native select is visually hidden by CSS)
+        sel.parentNode.insertBefore(wrapper, sel);
+        wrapper.appendChild(sel);
+        wrapper.appendChild(display);
+        wrapper.appendChild(list);
+      });
+    }
+
+    // Utility: show overview (initial 3 panels) and hide all editors
+    function showOverview() {
+      document.body.dataset.editor = 'false';
+      // Show initial panels
+      const initialPanels = document.getElementById('initialPanels');
+      if (initialPanels) {
+        initialPanels.style.display = 'grid';
+      }
+      // Hide editor panels container
+      const editorPanels = document.getElementById('editorPanels');
+      if (editorPanels) {
+        editorPanels.classList.remove('active');
+      }
+      // Remove active class from all editor cards
+      const map = {
+        roles: 'rolesCard', rewards: 'rewardCard', options: 'optionsCard', channels: 'channelLinksCard', categories: 'categoryLinksCard'
+      };
+      Object.values(map).forEach(id => { 
+        const e = document.getElementById(id); 
+        if (e) e.classList.remove('active');
+      });
+    }
+
+    // Utility: show a single editor panel and hide the overview
+    function showEditor(name) {
+      document.body.dataset.editor = 'true';
+      // Hide the initial panels
+      const initialPanels = document.getElementById('initialPanels');
+      if (initialPanels) {
+        initialPanels.style.display = 'none';
+      }
+      // Show editor panels container
+      const editorPanels = document.getElementById('editorPanels');
+      if (editorPanels) {
+        editorPanels.classList.add('active');
+      }
+      // Remove active from all editors first
+      const map = {
+        roles: 'rolesCard', rewards: 'rewardCard', options: 'optionsCard', channels: 'channelLinksCard', categories: 'categoryLinksCard'
+      };
+      Object.values(map).forEach(id => { 
+        const e = document.getElementById(id); 
+        if (e) e.classList.remove('active');
+      });
+      // Show target editor
+      const target = document.getElementById(map[name]);
+      if (target) {
+        target.classList.add('active');
+        // Initialize custom selects for this panel if not already done
+        replaceSelects();
+        // scroll into view
+        setTimeout(() => { target.scrollIntoView({behavior:'smooth', block:'start'}); }, 80);
+      }
+    }
+
+    // Wire picker panel buttons
+    document.querySelectorAll('#pickerPanel [data-edit]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const name = btn.dataset.edit;
+        showEditor(name);
+      });
+    });
+
+    // On load, mark unlinked/missing rows with .link-warning and keep it in sync on change
+    function syncLinkWarnings() {
+      // channel selects
+      Array.from(document.querySelectorAll('select[name="channel_select"], select[name="category_select"]')).forEach(sel => {
+        const row = sel.closest('.kv-row');
+        if (!row) return;
+        const val = sel.value;
+        if (!val || val === '') {
+          row.classList.add('link-warning');
+        } else {
+          row.classList.remove('link-warning');
+        }
+      });
+    }
+
+    // initial sync
+    setTimeout(syncLinkWarnings, 50);
+
+    // keep selects in sync (native selects fire change events when our custom items are clicked)
+    document.addEventListener('change', function (ev) {
+      const t = ev.target;
+      if (!t) return;
+      if (t.matches('select[name="channel_select"], select[name="category_select"]')) {
+        const row = t.closest('.kv-row');
+        if (!row) return;
+        if (!t.value || t.value === '') row.classList.add('link-warning'); else row.classList.remove('link-warning');
+      }
+    });
+
+    // Ensure all editor panels are hidden on initial load
+    (function ensureInitialState() {
+      showOverview();
+      
+      // DIAGNOSTIC: Log what's happening on page load
+      setTimeout(() => {
+        console.log('=== DIAGNOSTIC INFO ===');
+        const initialPanels = document.getElementById('initialPanels');
+        const editorPanels = document.getElementById('editorPanels');
+        
+        console.log('initialPanels display:', window.getComputedStyle(initialPanels).display);
+        console.log('editorPanels computed styles:', {
+          display: window.getComputedStyle(editorPanels).display,
+          visibility: window.getComputedStyle(editorPanels).visibility,
+          position: window.getComputedStyle(editorPanels).position,
+          left: window.getComputedStyle(editorPanels).left,
+          opacity: window.getComputedStyle(editorPanels).opacity,
+        });
+        console.log('editorPanels classList:', editorPanels.classList);
+        console.log('editorPanels boundingRect:', editorPanels.getBoundingClientRect());
+        
+        const editorCards = ['rolesCard', 'rewardCard', 'optionsCard', 'channelLinksCard', 'categoryLinksCard'];
+        editorCards.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) {
+            const style = window.getComputedStyle(el);
+            const rect = el.getBoundingClientRect();
+            console.log(`${id}:`, {
+              display: style.display,
+              visibility: style.visibility,
+              position: style.position,
+              classList: Array.from(el.classList),
+              classListString: el.className,
+              hasActiveClass: el.classList.contains('active'),
+              rect: { top: rect.top, left: rect.left, width: rect.width, height: rect.height }
+            });
+            if (rect.height > 0 && rect.width > 0 && rect.top > -10000) {
+              console.warn(`  ⚠️ ${id} IS VISIBLE IN VIEWPORT!`);
+            }
+          }
+        });
+      }, 100);
+    })();
+  </script>
+</body>
+</html>

@@ -15,6 +15,13 @@ DISCORD_CALLBACK_URL=http://localhost:3000/auth/callback
 
 # Database Configuration
 MONGO_URI=mongodb+srv:XXX
+# MongoDB TLS/SSL configuration (optional)
+# - MONGO_TLS: true|false (explicitly enable/disable TLS; Atlas requires TLS)
+# - MONGO_TLS_ALLOW_INVALID: true|false (allow invalid/self-signed certs; testing only)
+# - MONGO_TLS_CA_FILE: /absolute/path/to/ca-bundle.pem (use if you need to validate against a custom CA)
+MONGO_TLS=true
+MONGO_TLS_ALLOW_INVALID=false
+MONGO_TLS_CA_FILE=
 
 # CORS Configuration (Production)
 # Comma-separated list of allowed origins

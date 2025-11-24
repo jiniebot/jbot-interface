@@ -59,6 +59,12 @@
   user-select: none;
 }
 
+/* Global typography and color rules requested by user */
+html, body, input, textarea, select, button, a, p, li, span, label {
+  font-family: 'D-DIN', -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+  color: var(--text-light) !important;
+}
+
 /* Allow text selection in specific areas */
 .panel-content,
 .ios-card,
@@ -73,6 +79,7 @@ textarea {
 body {
   font-family: 'D-DIN', -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
+  /* allow per-page override (settings page needs scrolling) */
   overflow: hidden;
   height: 100vh;
   /* Prevent pull-to-refresh on mobile */
@@ -80,6 +87,68 @@ body {
   /* Disable iOS double-tap zoom */
   touch-action: manipulation;
 }
+
+/* Settings page specific overrides: enable scrolling and background imagery */
+body.settings-page {
+  overflow: auto;
+  height: auto;
+  min-height: 100vh;
+  background: #0f1720 url('/images/landingpage/lastpage.png') center/cover no-repeat fixed;
+}
+
+.settings-background::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  background: rgba(6,10,14,0.45);
+  z-index: 0;
+}
+
+.settings-container {
+  position: relative;
+  z-index: 1; /* above background */
+  max-width: 1200px;
+  margin: 120px auto 80px;
+  padding: 24px;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+}
+
+.settings-card {
+  grid-column: span 6;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 16px;
+  border-radius: 14px;
+}
+
+.settings-card.full-width { grid-column: 1 / -1; }
+
+.settings-card .card-actions { display:flex; gap:8px; margin-top:12px; }
+
+.kv-row { display:flex; gap:12px; margin:0 0 8px 0; padding:10px 12px; align-items:center; border-radius:10px; }
+.kv-row input { flex:1; }
+.kv-key { width:36%; display:flex; align-items:center; }
+.kv-val { flex:1; }
+.kv-actions { width:36px; display:flex; align-items:center; }
+
+/* Alternating row backgrounds for readability */
+.kv-row:nth-child(odd) { background: linear-gradient(180deg, rgba(255,255,255,0.012), rgba(255,255,255,0.008)); }
+.kv-row:nth-child(even) { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); }
+.kv-row + .kv-row { margin-top:8px; }
+.kv-row:hover { box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02); }
+
+.kv-key .info-label { font-size:13px; font-weight:700; color:var(--text-light); margin:0; }
+.kv-val { display:flex; align-items:center; }
+.kv-val .ios-input, .kv-val .custom-select-display { width:100%; }
+
+.save-status { margin-left:8px; font-size:13px; color:var(--text-gray); }
 
 /* Main Dashboard Container */
 #dashboard-container {
@@ -498,7 +567,7 @@ body {
 
 .info-label {
   font-size: 12px;
-  color: var(--text-gray);
+  color: var(--text-light);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 4px;
@@ -655,7 +724,7 @@ body {
   top: 20px;
   right: 20px;
   z-index: 1002;
-  pointer-events: none;
+  pointer-events: auto; /* allow clicks inside container */
 }
 
 .menu-dropdown {
@@ -850,6 +919,17 @@ body {
   transform: translateY(0);
 }
 
+/* Make buttons pill-shaped globally (rounded) - keep circular controls circular */
+button, .ios-button, .icon-button, .control-btn, .panel-toggle, .filter-toggle, .menu-item, .toolbar-item, .ios-toggle, .kv-actions .ios-button {
+  border-radius: 999px !important;
+}
+
+/* Ensure inputs and labels inherit white color */
+input, textarea, select, label { color: var(--text-light) !important; }
+
+/* Make smaller labels legible */
+.info-label, .toolbar-label, .menu-item-text { color: var(--text-light) !important; }
+
 /* Input Fields */
 .ios-input {
   width: 100%;
@@ -872,6 +952,63 @@ body {
 .ios-input::placeholder {
   color: var(--text-gray);
 }
+
+/* Selects: ensure dropdowns appear as frosted glass with white text */
+.ios-input.select, select.ios-input, .ios-input select {
+  background: rgba(255,255,255,0.06) !important;
+  color: var(--text-light) !important;
+  border: 1px solid var(--glass-border) !important;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding-right: 36px; /* room for arrow */
+  background-image: linear-gradient(45deg, transparent 50%, var(--text-light) 50%), linear-gradient(135deg, var(--text-light) 50%, transparent 50%);
+  background-position: calc(100% - 18px) calc(50% - 6px), calc(100% - 12px) calc(50% - 6px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+.ios-input select option {
+  background: rgba(6,10,14,0.95);
+  color: var(--text-light);
+}
+
+/* Custom select (JS-driven replacement to avoid native OS white dropdowns) */
+.custom-select {
+  position: relative;
+}
+.custom-select-display {
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--glass-border);
+  color: var(--text-light);
+  border-radius: 12px;
+  cursor: pointer;
+}
+.custom-select-list {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  max-height: 260px;
+  overflow: auto;
+  background: rgba(6,10,14,0.95);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+  z-index: 2000;
+  display: none;
+}
+.custom-select-list.show { display: block; }
+.custom-select-item {
+  padding: 10px 12px;
+  color: var(--text-light);
+  cursor: pointer;
+}
+.custom-select-item:hover { background: rgba(255,255,255,0.03); }
+
+/* Hide native select but keep it accessible to forms */
+select.customize-select { position: absolute !important; left: -9999px !important; top: auto !important; width: 1px !important; height: 1px !important; opacity: 0 !important; pointer-events: none !important; }
 
 /* Card/List Items */
 .ios-card {

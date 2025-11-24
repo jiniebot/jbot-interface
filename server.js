@@ -31,9 +31,47 @@ app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 // Security logging middleware
 app.use(securityLogger);
 
-mongoose.connect(process.env.MONGO_URI)
+// Build mongoose connection options with sensible defaults and env-based overrides
+const mongooseOptions = {
+  // modern parser and topology engine
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+};
+
+// TLS/SSL behavior can be controlled via environment variables.
+// - MONGO_TLS (true/false) enables or disables TLS explicitly
+// - MONGO_TLS_ALLOW_INVALID (true/false) allows invalid/self-signed certs (use only for testing)
+// - MONGO_TLS_CA_FILE (path) points to a CA bundle file for validating server certs
+if (process.env.MONGO_TLS === "false") {
+  mongooseOptions.tls = false;
+} else if (process.env.MONGO_TLS === "true") {
+  mongooseOptions.tls = true;
+}
+
+if (process.env.MONGO_TLS_ALLOW_INVALID === "true") {
+  // Allows self-signed or otherwise invalid certs - not recommended for production
+  mongooseOptions.tlsAllowInvalidCertificates = true;
+}
+
+if (process.env.MONGO_TLS_CA_FILE) {
+  // Provide CA file path if you need to validate against a custom CA
+  mongooseOptions.tlsCAFile = process.env.MONGO_TLS_CA_FILE;
+}
+
+mongoose.connect(process.env.MONGO_URI, mongooseOptions)
   .then(() => console.log("✅ Connected to MongoDB"))
-  .catch(err => console.error("❌ MongoDB Connection Error:", err));
+  .catch(err => {
+    // Improved error output to help debug TLS/SSL issues when switching DBs
+    console.error("❌ MongoDB Connection Error:", err && err.message ? err.message : err);
+    if (err && err.stack) console.error(err.stack);
+    // Helpful troubleshooting hints
+    console.error(
+      `Mongo connection string: ${process.env.MONGO_URI ? '[provided]' : '[not set]'}; MONGO_TLS=${process.env.MONGO_TLS}; MONGO_TLS_ALLOW_INVALID=${process.env.MONGO_TLS_ALLOW_INVALID}; MONGO_TLS_CA_FILE=${process.env.MONGO_TLS_CA_FILE || '[none]'}\n` +
+      'If you see a TLS/SSL handshake error, check whether the target MongoDB requires TLS (Atlas typically does),\n' +
+      'ensure your connection string (mongodb+srv vs mongodb://) is correct, and that node/OpenSSL supports the required TLS version.\n' +
+      'For testing only, you can set MONGO_TLS_ALLOW_INVALID=true to bypass certificate validation (NOT recommended in prod).'
+    );
+  });
 
 // Use secure session configuration
 app.use(session(getSessionConfig(process.env.MONGO_URI)));
@@ -45,6 +83,7 @@ app.use(passport.session());
 app.use("/auth", authLimiter, require("./routes/auth")); // Apply strict rate limiting to auth routes
 app.use("/selectGuildService", require("./routes/selectGuildService"));
 app.use("/dashboard", require("./routes/dashboard"));
+app.use("/settings", require("./routes/settings"));
 
 app.use((req, res, next) => {
   //console.log("🛠️ Current Session Data:", req.session);
@@ -86,6 +125,23 @@ app.get("/debug-session", (req, res) => {
     sessionServiceId: req.session.serviceId,
     sessionUser: req.user
   });
+});
+
+// Debug endpoint to check Globals data
+app.get("/debug-globals", async (req, res) => {
+  try {
+    const Globals = require("./schemas/globals/globals");
+    const allGlobals = await Globals.find({}).lean();
+    
+    res.json({
+      count: allGlobals.length,
+      globals: allGlobals,
+      userId: req.user?.id,
+      userGuilds: req.user?.availableGuilds
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 

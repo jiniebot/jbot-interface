@@ -506,18 +506,20 @@ export async function loadMonitorZones(map, layerGroup) {
     const zones = data.monitorZones || [];
     
     // Create a shared SVG renderer with extra padding to prevent clipping
-    const sharedRenderer = L.svg({ padding: 1.0 });
-    
-    // Create radial gradient for SVG
-    const svgDefs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-    svgDefs.innerHTML = `
-      <radialGradient id="zoneGradient" cx="50%" cy="50%" r="80%">
-        <stop offset="0%" stop-color="rgba(0,0,255,0)" />
-        <stop offset="100%" stop-color="rgba(0,0,255,0.5)" />
-      </radialGradient>
-    `;
-    const mapSvg = document.querySelector("svg");
-    if (mapSvg) mapSvg.appendChild(svgDefs);
+    const sharedRenderer = L.svg({ padding: 2.0 });
+
+    // Append radial gradient defs once (avoid duplicate defs)
+    if (!document.getElementById('zoneGradient')) {
+      const svgDefs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+      svgDefs.innerHTML = `
+        <radialGradient id="zoneGradient" cx="50%" cy="50%" r="80%">
+          <stop offset="0%" stop-color="rgba(0,0,255,0)" />
+          <stop offset="100%" stop-color="rgba(0,0,255,0.5)" />
+        </radialGradient>
+      `;
+      const mapSvg = document.querySelector("svg");
+      if (mapSvg) mapSvg.appendChild(svgDefs);
+    }
     
     zones.forEach((zone) => {
       let shape;
@@ -643,32 +645,55 @@ export async function loadMonitorZones(map, layerGroup) {
       }
     });
     
-    // Attach single zoom handler for gradient reapplication and radius update
+    // Attach single (debounced) handler for gradient reapplication and radius update
     if (!layerGroup._zoomHandlerAttached) {
-      map.on('zoomend', () => {
-        layerGroup.eachLayer((shape) => {
-          // Reapply gradient
-          if (shape._applyGradient) {
-            shape._applyGradient();
-          }
-          
-          // Update circle radius for pixel-based circles
-          if (shape._zoneData && shape._zoneData.zoneType === 0) {
-            const latLng = shape.getLatLng();
-            const edgePoint = mapDayZToLeaflet(
-              shape._zoneData.location[0] + shape._zoneData.range, 
-              shape._zoneData.location[2], 
-              map
-            );
-            const point1 = map.latLngToLayerPoint(latLng);
-            const point2 = map.latLngToLayerPoint(edgePoint);
-            const radiusInPixels = Math.sqrt(
-              Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2)
-            );
-            shape.setRadius(radiusInPixels);
+      let rafId = null;
+      const scheduleUpdate = () => {
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => {
+          try {
+            layerGroup.eachLayer((shape) => {
+              // Reapply gradient
+              if (shape._applyGradient) {
+                try { shape._applyGradient(); } catch (e) { /* ignore */ }
+              }
+
+              // Update circle radius for pixel-based circles
+              if (shape._zoneData && shape._zoneData.zoneType === 0) {
+                try {
+                  const latLng = shape.getLatLng();
+                  const edgePoint = mapDayZToLeaflet(
+                    shape._zoneData.location[0] + shape._zoneData.range,
+                    shape._zoneData.location[2],
+                    map
+                  );
+
+                  const point1 = map.latLngToLayerPoint(latLng);
+                  const point2 = map.latLngToLayerPoint(edgePoint);
+
+                  if (
+                    Number.isFinite(point1.x) && Number.isFinite(point1.y) &&
+                    Number.isFinite(point2.x) && Number.isFinite(point2.y)
+                  ) {
+                    const radiusInPixels = Math.sqrt(
+                      Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2)
+                    );
+                    if (Number.isFinite(radiusInPixels) && radiusInPixels > 0) {
+                      shape.setRadius(radiusInPixels);
+                    }
+                  }
+                } catch (err) {
+                  // If calculation fails during rapid interaction, skip this shape
+                }
+              }
+            });
+          } finally {
+            rafId = null;
           }
         });
-      });
+      };
+
+      map.on('zoomend moveend', scheduleUpdate);
       layerGroup._zoomHandlerAttached = true;
     }
     

@@ -213,7 +213,10 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const response = await fetch('/selectGuildService/service', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        headers: { 
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Accept': 'application/json'
+        },
         body: `serviceId=${serviceId}`
       });
 

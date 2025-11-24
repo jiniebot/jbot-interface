@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Store Management - JinieBot</title>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/dashboard-ios.css">
+    <link rel="stylesheet" href="/css/store.css">
+    
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Top Control Bar -->
+    <div id="top-controls">
+        <!-- Left Controls -->
+        <div class="control-group left-controls">
+            <button class="control-btn" id="backToDashboard" title="Back to Dashboard">
+                <span>←</span>
+            </button>
+            <button class="control-btn" id="refreshBtn" title="Refresh">
+                <span>🔄</span>
+            </button>
+        </div>
+
+        <!-- Center Title -->
+        <div class="control-group center-controls">
+            <h1 class="page-title">Store Management</h1>
+        </div>
+
+        <!-- Right Controls -->
+        <div class="control-group right-controls">
+            <button class="control-btn" id="addItemBtn" title="Add New Item">
+                <span>+</span>
+            </button>
+            <button class="control-btn menu-button" id="menuButton" title="Menu">
+                <span>⋯</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Global Menu Dropdown -->
+    <div id="global-menu">
+        <div class="menu-dropdown" id="menuDropdown">
+            <a href="/dashboard" class="menu-item">
+                <div class="menu-item-icon">🏠</div>
+                <div class="menu-item-text">Dashboard</div>
+            </a>
+            <a href="/dashboard/store" class="menu-item">
+                <div class="menu-item-icon">🛒</div>
+                <div class="menu-item-text">Store Management</div>
+            </a>
+            <div class="menu-divider"></div>
+            <a href="/selectGuildService" class="menu-item">
+                <div class="menu-item-icon">🔄</div>
+                <div class="menu-item-text">Change Service</div>
+            </a>
+            <a href="/auth/logout" class="menu-item">
+                <div class="menu-item-icon">🚪</div>
+                <div class="menu-item-text">Logout</div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div id="store-container">
+        <!-- Loading Spinner -->
+        <div id="loadingSpinner" class="loading-container">
+            <div class="ios-spinner"></div>
+            <p class="loading-text">Loading store items...</p>
+        </div>
+
+        <!-- Store Content -->
+        <div id="storeContent" class="store-content" style="display: none;">
+            <!-- Shop Categories Container -->
+            <div id="shopCategoriesContainer" class="shop-categories-container">
+                <!-- Shop categories will be dynamically inserted here -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <div class="empty-state-icon">🛒</div>
+                <h2>No Items Yet</h2>
+                <p>Start by adding your first shop item</p>
+                <button class="ios-button" id="emptyStateAddBtn">
+                    <i class="fas fa-plus"></i> Add Item
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Item Modal -->
+    <div id="itemModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add New Item</h2>
+                <button class="modal-close" id="closeItemModalBtn">&times;</button>
+            </div>
+            <form id="itemForm" class="modal-form">
+                <input type="hidden" id="itemId" name="itemId">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="itemID">Item ID *</label>
+                        <input type="text" id="itemID" name="itemID" class="ios-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="name">Name *</label>
+                        <input type="text" id="name" name="name" class="ios-input" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fileName">File Name *</label>
+                        <input type="text" id="fileName" name="fileName" class="ios-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="fileNameFlat">File Name Flat</label>
+                        <input type="text" id="fileNameFlat" name="fileNameFlat" class="ios-input">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" class="ios-input" rows="3"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="price">Price *</label>
+                        <input type="number" id="price" name="price" class="ios-input" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="maxQuantity">Max Quantity *</label>
+                        <input type="number" id="maxQuantity" name="maxQuantity" class="ios-input" min="1" value="1" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="lifetime">Lifetime (minutes) *</label>
+                        <input type="number" id="lifetime" name="lifetime" class="ios-input" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="factionLevel">Faction Level *</label>
+                        <input type="number" id="factionLevel" name="factionLevel" class="ios-input" value="-1" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="shopCategory">Shop Category *</label>
+                        <input type="text" id="shopCategory" name="shopCategory" class="ios-input" list="shopCategoryList" required>
+                        <datalist id="shopCategoryList"></datalist>
+                    </div>
+                    <div class="form-group">
+                        <label for="itemCategory">Item Category *</label>
+                        <input type="text" id="itemCategory" name="itemCategory" class="ios-input" list="itemCategoryList" required>
+                        <datalist id="itemCategoryList"></datalist>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="imagePath">Image URL</label>
+                    <input type="url" id="imagePath" name="imagePath" class="ios-input">
+                </div>
+
+                <div class="form-group">
+                    <label for="author">Author</label>
+                    <input type="text" id="author" name="author" class="ios-input">
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="ios-button secondary" id="cancelItemModalBtn">Cancel</button>
+                    <button type="submit" class="ios-button primary">
+                        <span id="submitBtnText">Add Item</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Item Details Modal -->
+    <div id="itemDetailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Item Details</h2>
+                <button class="modal-close" id="closeItemDetailsModalBtn">&times;</button>
+            </div>
+            <div id="itemDetailsContent" class="item-details-content">
+                <!-- Item details will be populated here -->
+            </div>
+            <div class="modal-actions">
+                <button class="ios-button secondary" id="closeItemDetailsModalBtn2">Close</button>
+                <button class="ios-button warning" id="editCurrentItemBtn">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button class="ios-button danger" id="deleteCurrentItemBtn">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Drag Preview -->
+    <div id="dragPreview" class="drag-preview" style="display: none;"></div>
+
+    <!-- Bottom Toolbar -->
+    <div id="bottom-toolbar">
+        <a href="/dashboard" class="toolbar-item">
+            <div class="toolbar-icon">🗺️</div>
+            <div class="toolbar-label">Map</div>
+        </a>
+        <a href="/dashboard/store" class="toolbar-item active">
+            <div class="toolbar-icon">🛒</div>
+            <div class="toolbar-label">Store</div>
+        </a>
+        <a href="/quests" class="toolbar-item">
+            <div class="toolbar-icon">�</div>
+            <div class="toolbar-label">Quests</div>
+        </a>
+        <a href="/logs" class="toolbar-item">
+            <div class="toolbar-icon">📋</div>
+            <div class="toolbar-label">Logs</div>
+        </a>
+        <a href="/spawner-queue" class="toolbar-item">
+            <div class="toolbar-icon">🔄</div>
+            <div class="toolbar-label">Queue</div>
+        </a>
+    </div>
+
+    <!-- Pass server data to JavaScript -->
+    <script>
+        window.guildId = '<%= guildId %>';
+        window.serviceId = '<%= serviceId %>';
+        window.user = <%- JSON.stringify(user) %>;
+    </script>
+
+    <!-- Custom JavaScript -->
+    <script src="/js/pages/store.js"></script>
+</body>
+</html>

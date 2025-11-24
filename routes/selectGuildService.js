@@ -104,7 +104,14 @@ router.post("/service", (req, res) => {
   if (!selectedService) return res.status(404).json({ error: "Service not found" });
 
   req.session.serviceId = selectedService.serviceId;
-  req.session.save(() => res.json({ redirect: "/dashboard" }));
+  // If this request came from JS (fetch), return JSON with redirect URL so the client can navigate
+  return req.session.save(() => {
+    if (req.xhr || (req.headers.accept && req.headers.accept.indexOf('application/json') !== -1)) {
+      return res.json({ redirect: "/dashboard" });
+    }
+    // Fallback for non-AJAX requests
+    return res.redirect("/dashboard");
+  });
 });
 
 module.exports = router;

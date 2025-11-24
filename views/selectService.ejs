@@ -5,19 +5,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Select a Service - JinieBot</title>
     <link rel="stylesheet" href="/css/selectService.css">
+    <link rel="stylesheet" href="/css/responsive-base.css">
 </head>
 <body>
+    <!-- Background Image -->
+    <div class="background-image"></div>
+    
+    <button class="back-btn" id="backBtn">Back</button>
+    
     <div class="container">
-        <h1>Select a Service</h1>
+        <h1 class="page-title">Select Your Service</h1>
+        <p class="page-subtitle">Choose which DayZ server to manage</p>
         
-        <form action="/selectGuildService/service" method="POST">
-            <% guild.services.forEach(service => { %>
-                <input type="hidden" name="guildId" value="<%= guild.guildId %>">
-                <button type="submit" name="serviceId" value="<%= service.serviceId %>">
-                    <%= service.serviceName %>
-                </button>
-            <% }); %>
-        </form>
+        <div class="services-container">
+            <div class="service-cards">
+                <% guild.services.forEach(service => { %>
+                    <div class="service-card" data-service-id="<%= service.serviceId %>">
+                        <div class="service-icon-container">
+                            <% 
+                            // Determine map icon based on service name
+                            let mapIcon = 'chernarus.png'; // default
+                            const serviceName = service.serviceName.toLowerCase();
+                            if (serviceName.includes('livonia')) {
+                                mapIcon = 'livonia.png';
+                            } else if (serviceName.includes('sakhal')) {
+                                mapIcon = 'sakhal.png';
+                            } else if (serviceName.includes('deer')) {
+                                mapIcon = 'deerisle.png';
+                            } else if (serviceName.includes('namalsk')) {
+                                mapIcon = 'namalsk.png';
+                            } else if (serviceName.includes('esseker')) {
+                                mapIcon = 'esseker.png';
+                            } else if (serviceName.includes('banov')) {
+                                mapIcon = 'banov.png';
+                            } else if (serviceName.includes('takistan')) {
+                                mapIcon = 'takistan.png';
+                            }
+                            %>
+                            <img src="/images/mapicons/<%= mapIcon %>" alt="<%= service.serviceName %>" class="service-icon" onerror="this.src='/images/mapicons/chernarus.png'">
+                        </div>
+                        <h2 class="service-name"><%= service.serviceName %></h2>
+                        <form action="/selectGuildService/service" method="POST" style="width: 100%;">
+                            <input type="hidden" name="guildId" value="<%= guild.guildId %>">
+                            <button type="submit" name="serviceId" value="<%= service.serviceId %>" class="service-select-btn">
+                                Select Service
+                            </button>
+                        </form>
+                    </div>
+                <% }); %>
+            </div>
+        </div>
     </div>
+    
+    <script>
+        document.getElementById('backBtn').addEventListener('click', function() {
+            window.location.href = '/selectGuildService';
+        });
+    </script>
 </body>
 </html>

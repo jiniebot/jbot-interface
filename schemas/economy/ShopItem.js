@@ -75,6 +75,10 @@ const ShopItemSchema = new Schema(
       type: Number,
       required: true,
     },
+    displayOrder: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );

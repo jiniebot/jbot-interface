@@ -14,6 +14,9 @@ const {
 // Apply sanitization to all API routes
 router.use(sanitizeInput);
 
+// Mount sub-routers for different API sections
+router.use('/store', require('./api/store'));
+
 // 🟢 Fetch Players (Scoped by Guild & Service)
 router.get("/recent-players", requireAuthAndScope, async (req, res) => {
   try {

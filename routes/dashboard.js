@@ -31,4 +31,13 @@ router.get("/", isAuthenticated, (req, res) => {
   });
 });
 
+// Render the Store Management Page
+router.get("/store", isAuthenticated, (req, res) => {
+  res.render("store", {
+    user: req.user,
+    guildId: req.session.guildId,
+    serviceId: req.session.serviceId
+  });
+});
+
 module.exports = router;
