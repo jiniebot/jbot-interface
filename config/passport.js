@@ -2,7 +2,7 @@ require("dotenv").config();
 
 const passport = require("passport");
 const DiscordStrategy = require("passport-discord").Strategy;
-const Globals = require("../schemas/globals/globals");
+const Globals = require("../schemas/globals/Globals");
 
 passport.use(
   new DiscordStrategy(

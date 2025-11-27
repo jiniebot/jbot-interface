@@ -130,7 +130,7 @@ app.get("/debug-session", (req, res) => {
 // Debug endpoint to check Globals data
 app.get("/debug-globals", async (req, res) => {
   try {
-    const Globals = require("./schemas/globals/globals");
+    const Globals = require("./schemas/globals/Globals");
     const allGlobals = await Globals.find({}).lean();
     
     res.json({
