@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const Globals = require("../schemas/globals/globals");
+const Globals = require("../schemas/globals/Globals");
 const BaseProfile = require("../schemas/userData/BaseProfile");
 const ActiveObjSp = require("../schemas/gameData/ActiveObjSp");
 const MonitorZone = require("../schemas/gameData/MonitorZone");

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Globals = require('../schemas/globals/globals');
+const Globals = require('../schemas/globals/Globals');
 
 function isAuthenticated(req, res, next) {
   if (req.isAuthenticated() && req.session.guildId && req.session.serviceId) {

@@ -206,7 +206,7 @@ const requireRole = (allowedRoles) => {
     }
 
     try {
-      const Globals = require("../schemas/globals/globals");
+      const Globals = require("../schemas/globals/Globals");
       
       const guild = await Globals.findOne({
         guildid: req.session.guildId,

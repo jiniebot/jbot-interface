@@ -550,7 +550,7 @@ router.get('/item-categories',
       const { guildId, serviceId } = req.session;
       const path = require('path');
       const fs = require('fs');
-      const Globals = require('../../schemas/globals/globals');
+      const Globals = require('../../schemas/globals/Globals');
 
       // Default categories (always available)
       const defaultCategories = {
