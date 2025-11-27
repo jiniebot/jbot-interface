@@ -1,13 +1,14 @@
 let currentLayer = null;
 
 export function initializeMap() {
-  const maxZoom = 8;
+  // Max zoom matches available tile zoom levels in /public/js/map/tiles (keep in sync with TILE_MAX_ZOOM)
+  const maxZoom = 6;
 
   // Get mapLoc from session data
   const mapLoc = window.sessionData?.mapLoc || 0;
   
   // Map mapLoc numbers to map names (folder names in tiles directory)
-  const mapNames = { 0: 'Chernarus', 1: 'Livonia', 3: 'Sakhal' };
+  const mapNames = { 0: 'Chernarus', 1: 'Sakhal', 2: 'Livonia' };
   const mapName = mapNames[mapLoc] || 'Chernarus';
 
   // Define bounds for DayZ maps (approximately 15360 x 15360 for Chernarus)
@@ -25,9 +26,10 @@ export function initializeMap() {
     crs: L.CRS.EPSG3857, // 🛠 Change CRS to Web Mercator
     bounceAtZoomLimits: true,
   });
+  map.options.mapName = mapName; // Expose map name for downstream coordinate conversion
 
   const tileLayers = {
-    Top: L.tileLayer(`/js/map/tiles/${mapName}/Top/res{z}/1.26.0/{y}_{x}.webp`, {
+    Top: L.tileLayer(`/js/map/tiles/${mapName}/Top/{z}/{x}/{y}.png`, {
       tileSize: 256,
       maxZoom: maxZoom,
       minZoom: 1,
@@ -35,7 +37,7 @@ export function initializeMap() {
       bounds: bounds,
       errorTileUrl: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
     }),
-    Sat: L.tileLayer(`/js/map/tiles/${mapName}/Sat/res{z}/1.26.0/{y}_{x}.webp`, {
+    Sat: L.tileLayer(`/js/map/tiles/${mapName}/Sat/{z}/{x}/{y}.png`, {
       tileSize: 256,
       maxZoom: maxZoom,
       minZoom: 1,

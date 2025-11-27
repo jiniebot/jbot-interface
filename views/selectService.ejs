@@ -22,24 +22,14 @@
                 <% guild.services.forEach(service => { %>
                     <div class="service-card" data-service-id="<%= service.serviceId %>">
                         <div class="service-icon-container">
-                            <% 
-                            // Determine map icon based on service name
-                            let mapIcon = 'chernarus.png'; // default
-                            const serviceName = service.serviceName.toLowerCase();
-                            if (serviceName.includes('livonia')) {
-                                mapIcon = 'livonia.png';
-                            } else if (serviceName.includes('sakhal')) {
+                            <%
+                            // Choose map icon from ServerInfo.mapLoc (fallback to top-level mapLoc)
+                            const mapLocValue = Number(service.ServerInfo?.mapLoc ?? service.mapLoc);
+                            let mapIcon = 'chernarus.png'; // default 0
+                            if (mapLocValue === 1) {
                                 mapIcon = 'sakhal.png';
-                            } else if (serviceName.includes('deer')) {
-                                mapIcon = 'deerisle.png';
-                            } else if (serviceName.includes('namalsk')) {
-                                mapIcon = 'namalsk.png';
-                            } else if (serviceName.includes('esseker')) {
-                                mapIcon = 'esseker.png';
-                            } else if (serviceName.includes('banov')) {
-                                mapIcon = 'banov.png';
-                            } else if (serviceName.includes('takistan')) {
-                                mapIcon = 'takistan.png';
+                            } else if (mapLocValue === 2) {
+                                mapIcon = 'livonia.png';
                             }
                             %>
                             <img src="/images/mapicons/<%= mapIcon %>" alt="<%= service.serviceName %>" class="service-icon" onerror="this.src='/images/mapicons/chernarus.png'">

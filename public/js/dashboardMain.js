@@ -13,11 +13,6 @@ import {
   loadActiveObjSps
 } from "./map/dataLoader.js";
 
-import {
-  mapDayZToLeaflet,
-  scaleToLeaflet,
-} from "./izurvive/mapDayZToLeaflet.js";
-
 // Create layer groups for all data types
 let recentPlayersLayer = L.layerGroup();
 let baseClusterGroup = L.layerGroup();

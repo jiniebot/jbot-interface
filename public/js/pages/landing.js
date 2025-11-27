@@ -287,11 +287,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderCommands(commands, container) {
+    let expandedCommand = null;
+
     commands.forEach(command => {
       if (command.deleted) return;
       
       const commandItem = document.createElement('div');
-      commandItem.className = 'command-item';
+      commandItem.className = 'command-item collapsed';
+      commandItem.dataset.commandName = command.name;
       
       const commandName = document.createElement('div');
       commandName.className = 'command-name';
@@ -310,6 +313,9 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Render subcommand groups
       if (command.subcommandGroups && command.subcommandGroups.length > 0) {
+        const groupsContainer = document.createElement('div');
+        groupsContainer.className = 'subcommand-groups-container';
+        
         command.subcommandGroups.forEach(group => {
           const groupDiv = document.createElement('div');
           groupDiv.className = 'subcommand-group';
@@ -329,7 +335,7 @@ document.addEventListener('DOMContentLoaded', () => {
           // Render subcommands in group
           if (group.subcommands && group.subcommands.length > 0) {
             const subcommandsContainer = document.createElement('div');
-            subcommandsContainer.className = 'command-children';
+            subcommandsContainer.className = 'subcommands-container';
             
             group.subcommands.forEach(subcommand => {
               const subcommandDiv = document.createElement('div');
@@ -350,19 +356,21 @@ document.addEventListener('DOMContentLoaded', () => {
               // Render options
               if (subcommand.options && subcommand.options.length > 0) {
                 const optionsContainer = document.createElement('div');
-                optionsContainer.className = 'command-children';
+                optionsContainer.className = 'options-container';
                 
                 subcommand.options.forEach(option => {
                   const optionDiv = document.createElement('div');
                   optionDiv.className = option.required ? 'option option-required' : 'option';
-                  optionDiv.textContent = `${option.name} (${option.type})${option.required ? ' *' : ''} - ${option.description}`;
+                  optionDiv.textContent = `${option.name} (${option.type})${option.required ? ' *' : ''}`;
+                  optionDiv.title = option.description;
                   optionsContainer.appendChild(optionDiv);
                 });
                 
                 subcommandDiv.appendChild(optionsContainer);
                 
                 subcommandName.style.cursor = 'pointer';
-                subcommandName.addEventListener('click', () => {
+                subcommandName.addEventListener('click', (e) => {
+                  e.stopPropagation();
                   optionsContainer.classList.toggle('expanded');
                   subcommandName.classList.toggle('expanded');
                 });
@@ -374,18 +382,24 @@ document.addEventListener('DOMContentLoaded', () => {
             groupDiv.appendChild(subcommandsContainer);
             
             groupName.style.cursor = 'pointer';
-            groupName.addEventListener('click', () => {
+            groupName.addEventListener('click', (e) => {
+              e.stopPropagation();
               subcommandsContainer.classList.toggle('expanded');
               groupName.classList.toggle('expanded');
             });
           }
           
-          childrenContainer.appendChild(groupDiv);
+          groupsContainer.appendChild(groupDiv);
         });
+        
+        childrenContainer.appendChild(groupsContainer);
       }
       
       // Render direct subcommands
       if (command.subcommands && command.subcommands.length > 0) {
+        const subcommandsContainer = document.createElement('div');
+        subcommandsContainer.className = 'subcommands-container';
+        
         command.subcommands.forEach(subcommand => {
           const subcommandDiv = document.createElement('div');
           subcommandDiv.className = 'subcommand';
@@ -405,44 +419,100 @@ document.addEventListener('DOMContentLoaded', () => {
           // Render options
           if (subcommand.options && subcommand.options.length > 0) {
             const optionsContainer = document.createElement('div');
-            optionsContainer.className = 'command-children';
+            optionsContainer.className = 'options-container';
             
             subcommand.options.forEach(option => {
               const optionDiv = document.createElement('div');
               optionDiv.className = option.required ? 'option option-required' : 'option';
-              optionDiv.textContent = `${option.name} (${option.type})${option.required ? ' *' : ''} - ${option.description}`;
+              optionDiv.textContent = `${option.name} (${option.type})${option.required ? ' *' : ''}`;
+              optionDiv.title = option.description;
               optionsContainer.appendChild(optionDiv);
             });
             
             subcommandDiv.appendChild(optionsContainer);
             
             subcommandName.style.cursor = 'pointer';
-            subcommandName.addEventListener('click', () => {
+            subcommandName.addEventListener('click', (e) => {
+              e.stopPropagation();
               optionsContainer.classList.toggle('expanded');
               subcommandName.classList.toggle('expanded');
             });
           }
           
-          childrenContainer.appendChild(subcommandDiv);
+          subcommandsContainer.appendChild(subcommandDiv);
         });
+        
+        childrenContainer.appendChild(subcommandsContainer);
       }
       
       // Render direct options
       if (command.options && command.options.length > 0) {
+        const optionsContainer = document.createElement('div');
+        optionsContainer.className = 'options-container';
+        
         command.options.forEach(option => {
           const optionDiv = document.createElement('div');
           optionDiv.className = option.required ? 'option option-required' : 'option';
-          optionDiv.textContent = `${option.name} (${option.type})${option.required ? ' *' : ''} - ${option.description}`;
-          childrenContainer.appendChild(optionDiv);
+          optionDiv.textContent = `${option.name} (${option.type})${option.required ? ' *' : ''}`;
+          optionDiv.title = option.description;
+          optionsContainer.appendChild(optionDiv);
         });
+        
+        childrenContainer.appendChild(optionsContainer);
       }
       
       if (childrenContainer.children.length > 0) {
         commandItem.appendChild(childrenContainer);
         
-        commandName.addEventListener('click', () => {
-          childrenContainer.classList.toggle('expanded');
-          commandName.classList.toggle('expanded');
+        commandName.addEventListener('click', (e) => {
+          e.stopPropagation();
+          
+          // Check if this command is already expanded
+          const isCurrentlyExpanded = commandItem.classList.contains('expanded-item');
+          
+          if (isCurrentlyExpanded) {
+            // Collapse this command and return to grid view
+            commandItem.classList.remove('expanded-item');
+            commandItem.classList.add('collapsed');
+            childrenContainer.classList.remove('expanded');
+            commandName.classList.remove('expanded');
+            container.classList.remove('has-expanded');
+            
+            // Show all other commands
+            const allItems = container.querySelectorAll('.command-item');
+            allItems.forEach(item => {
+              item.classList.remove('hidden');
+              item.classList.add('collapsed');
+            });
+            
+            expandedCommand = null;
+          } else {
+            // Expand this command and hide others
+            if (expandedCommand) {
+              expandedCommand.classList.remove('expanded-item');
+              expandedCommand.classList.add('hidden');
+              expandedCommand.querySelector('.command-children').classList.remove('expanded');
+              expandedCommand.querySelector('.command-name').classList.remove('expanded');
+            }
+            
+            // Hide all other commands
+            const allItems = container.querySelectorAll('.command-item');
+            allItems.forEach(item => {
+              if (item !== commandItem) {
+                item.classList.add('hidden');
+                item.classList.remove('collapsed');
+              }
+            });
+            
+            // Expand this command
+            commandItem.classList.remove('collapsed', 'hidden');
+            commandItem.classList.add('expanded-item');
+            childrenContainer.classList.add('expanded');
+            commandName.classList.add('expanded');
+            container.classList.add('has-expanded');
+            
+            expandedCommand = commandItem;
+          }
         });
       }
       

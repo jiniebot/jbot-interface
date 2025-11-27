@@ -163,8 +163,8 @@ document.addEventListener('DOMContentLoaded', () => {
     card.dataset.serviceId = service.serviceId;
 
     // Convert mapLoc number to map name
-    const mapNames = { 0: 'chernarus', 1: 'livonia', 3: 'sakhal' };
-    const mapLoc = mapNames[service.mapLoc] || 'chernarus';
+    const mapNames = { 0: 'chernarus', 1: 'sakhal', 2: 'livonia' };
+    const mapLoc = mapNames[Number(service.mapLoc)] || 'chernarus';
     const iconPath = `/images/mapicons/${mapLoc}.png`;
 
     // Create icon container

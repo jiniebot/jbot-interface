@@ -1,48 +1,56 @@
-import { IzurviveTransformation } from "./izurvive.js";
-import { Point } from "./transform.js";
+const MAP_SIZES = {
+  Chernarus: 15360,
+  Livonia: 12800,
+  Sakhal: 15360,
+};
 
-const transformation = IzurviveTransformation.chernarusPlus();
+const TILE_SIZE = 256;
+const TILE_MAX_ZOOM = 6;
+const WORLD_SIZE = TILE_SIZE * Math.pow(2, TILE_MAX_ZOOM);
+
+function resolveMapName(map) {
+  if (map?.options?.mapName) return map.options.mapName;
+  const mapLoc = window.sessionData?.mapLoc || 0;
+  const mapNames = { 0: "Chernarus", 1: "Sakhal", 2: "Livonia" };
+  return mapNames[mapLoc] || "Chernarus";
+}
 
 /**
  * Convert DayZ XZ coordinates into Leaflet LatLng.
  * @param {number} x - The X coordinate from DayZ.
  * @param {number} z - The Z coordinate from DayZ.
+ * @param {L.Map} [map] - Leaflet map instance to use for unprojection.
  * @returns {L.LatLng} - The lat/lng position for Leaflet.
  */
-function mapDayZToLeaflet(x, z) {
-  // console.log(`🔍 Converting DayZ Coordinates: X=${x}, Z=${z}`);
-
+function mapDayZToLeaflet(x, z, map) {
   if (isNaN(x) || isNaN(z)) {
     console.error("❌ Invalid DayZ coordinates (NaN detected)!");
     return null;
   }
 
   try {
-    // Convert DayZ XZ to iZurvive lat/lng
-    const izurviveCoordinate = transformation.dayzPointToIzurviveCoordinate(
-      new Point(x, z)
-    );
+    const mapName = resolveMapName(map);
+    const mapSize = MAP_SIZES[mapName] || MAP_SIZES.Chernarus;
 
-    // console.log(
-    //   `✅ Converted: DayZ (${x}, ${z}) → iZurvive (Lat: ${izurviveCoordinate.lat}, Lng: ${izurviveCoordinate.lng})`
-    // );
+    // Scale DayZ coordinates into the pixel space of the tile pyramid (0..WORLD_SIZE)
+    // DayZ uses bottom-left origin; Leaflet/tile pyramid expects top-left, so flip Y.
+    const pixelX = (x / mapSize) * WORLD_SIZE;
+    const pixelY = WORLD_SIZE - (z / mapSize) * WORLD_SIZE;
 
-    if (isNaN(izurviveCoordinate.lat) || isNaN(izurviveCoordinate.lng)) {
-      console.error(
-        "❌ Transformation failed: NaN detected in iZurvive output!"
-      );
-      return null;
+    // Use map-specific unprojection when available to ensure exact alignment with the tile grid
+    if (map?.unproject) {
+      return map.unproject([pixelX, pixelY], TILE_MAX_ZOOM);
     }
 
-    // Return LatLng directly (Leaflet uses LatLng, same as iZurvive)
-    return new L.LatLng(izurviveCoordinate.lat, izurviveCoordinate.lng);
+    // Fallback to CRS conversion when map is not available
+    return L.CRS.EPSG3857.pointToLatLng(L.point(pixelX, pixelY), TILE_MAX_ZOOM);
   } catch (error) {
     console.error("🚨 Error during coordinate transformation:", error);
     return null;
   }
 }
 
-function scaleToLeaflet(radius) {
+function scaleToLeaflet(radius, map) {
   if (isNaN(radius) || radius <= 0) {
     // Return null silently for invalid radius - caller will handle
     return null;
@@ -51,34 +59,19 @@ function scaleToLeaflet(radius) {
   try {
     // Reference point in DayZ world
     const baseX = 5000, baseZ = 5000;
-    const pointA = new Point(baseX, baseZ);
-    const pointB = new Point(baseX + radius, baseZ); // Offset in X direction
+    const coordA = mapDayZToLeaflet(baseX, baseZ, map);
+    const coordB = mapDayZToLeaflet(baseX + radius, baseZ, map);
 
-    // Convert both points to iZurvive coordinates
-    const coordA = transformation.dayzPointToIzurviveCoordinate(pointA);
-    const coordB = transformation.dayzPointToIzurviveCoordinate(pointB);
-
-    if (isNaN(coordA.lat) || isNaN(coordA.lng) || isNaN(coordB.lat) || isNaN(coordB.lng)) {
-      console.error("❌ Transformation failed: NaN detected in iZurvive output!");
+    if (!coordA || !coordB) {
+      console.error("❌ Transformation failed while computing scale.");
       return null;
     }
 
-    // Calculate distance using haversine formula
-    const earthRadius = 6378137; // Earth radius in meters
-    const rad = Math.PI / 180;
-    const dLat = (coordB.lat - coordA.lat) * rad;
-    const dLng = (coordB.lng - coordA.lng) * rad;
-    const lat1 = coordA.lat * rad;
-    const lat2 = coordB.lat * rad;
+    if (map?.distance) {
+      return map.distance(coordA, coordB);
+    }
 
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-              Math.cos(lat1) * Math.cos(lat2) *
-              Math.sin(dLng / 2) * Math.sin(dLng / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-    const distance = earthRadius * c;
-
-    return distance;
+    return L.CRS.EPSG3857.distance(coordA, coordB);
   } catch (error) {
     console.error("🚨 Error during scaling transformation:", error);
     return null;

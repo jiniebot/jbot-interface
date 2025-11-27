@@ -22,6 +22,53 @@ function generateSecret(bytes = 64) {
 }
 
 /**
+ * Generate a secret that satisfies kruptein complexity requirements:
+ * - At least 2 uppercase, 2 lowercase, 2 numbers, 2 special chars
+ */
+function generateKrupteinSecret(length = 64) {
+  const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const lower = 'abcdefghijklmnopqrstuvwxyz';
+  const numbers = '0123456789';
+  const special = '!@#$%^&*()_+-=[]{};:\'"\\|,.<>/?';
+  const all = upper + lower + numbers + special;
+
+  // Seed with required character categories
+  let secretChars = [
+    upper, upper,
+    lower, lower,
+    numbers, numbers,
+    special, special,
+  ].map(pool => pool[crypto.randomInt(0, pool.length)]);
+
+  // Fill remaining positions
+  while (secretChars.length < length) {
+    secretChars.push(all[crypto.randomInt(0, all.length)]);
+  }
+
+  // Shuffle to avoid predictable ordering
+  for (let i = secretChars.length - 1; i > 0; i--) {
+    const j = crypto.randomInt(0, i + 1);
+    [secretChars[i], secretChars[j]] = [secretChars[j], secretChars[i]];
+  }
+
+  return secretChars.join('');
+}
+
+/**
+ * Validate a secret against kruptein's complexity rules
+ */
+function isKrupteinComplex(secret) {
+  if (!secret || secret.length < 8) return false;
+  const hasTwo = (regex) => (secret.match(regex) || []).length >= 2;
+  return (
+    hasTwo(/[A-Z]/g) &&
+    hasTwo(/[a-z]/g) &&
+    hasTwo(/[0-9]/g) &&
+    hasTwo(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g)
+  );
+}
+
+/**
  * Validate existing .env file
  */
 function validateEnvFile() {
@@ -51,6 +98,12 @@ function validateEnvFile() {
     issues.push('❌ SESSION_SECRET is too short (minimum 32 characters)');
   }
 
+  // Check kruptein complexity for SESSION_CRYPTO_SECRET
+  const sessionCryptoMatch = envContent.match(/SESSION_CRYPTO_SECRET=(.+)/);
+  if (!sessionCryptoMatch || !isKrupteinComplex(sessionCryptoMatch[1])) {
+    issues.push('❌ SESSION_CRYPTO_SECRET fails kruptein complexity (needs 2 upper, 2 lower, 2 numbers, 2 special chars)');
+  }
+
   if (issues.length > 0) {
     console.log('Security Issues Found:');
     issues.forEach(issue => console.log(`  ${issue}`));
@@ -70,7 +123,7 @@ function generateSecrets() {
   console.log();
 
   const sessionSecret = generateSecret(64);
-  const sessionCryptoSecret = generateSecret(64);
+  const sessionCryptoSecret = generateKrupteinSecret(64);
 
   console.log('SESSION_SECRET:');
   console.log(sessionSecret);
@@ -204,4 +257,4 @@ if (require.main === module) {
   main();
 }
 
-module.exports = { generateSecret, validateEnvFile };
+module.exports = { generateSecret, generateKrupteinSecret, isKrupteinComplex, validateEnvFile };

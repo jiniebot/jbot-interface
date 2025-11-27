@@ -1,0 +1,791 @@
+[
+  {
+    "nameEN": "Bielawa",
+    "nameRU": null,
+    "lat": 67.34720626785955,
+    "lng": -135.71087645530702,
+    "spellings": [
+      "Bielawa"
+    ],
+    "type": "Village",
+    "minZoom": 3,
+    "x": 1574.7243927001955,
+    "y": 9675.678005982103
+  },
+  {
+    "nameEN": "Lukow",
+    "nameRU": null,
+    "lat": 82.54731503471534,
+    "lng": -80.7028255748749,
+    "spellings": [
+      "Lukow"
+    ],
+    "type": "Village",
+    "minZoom": 3,
+    "x": 3530.5662017822265,
+    "y": 11964.338862915205
+  },
+  {
+    "nameEN": "Gliniska",
+    "nameRU": null,
+    "lat": 69.85099172367825,
+    "lng": -39.56432838821412,
+    "spellings": [
+      "Gliniska"
+    ],
+    "type": "Village",
+    "minZoom": 3,
+    "x": 4993.268323974609,
+    "y": 9919.92327514709
+  },
+  {
+    "nameEN": "Brena",
+    "nameRU": null,
+    "lat": 79.21866693729298,
+    "lng": 6.130709318161025,
+    "spellings": [
+      "Brena"
+    ],
+    "type": "City",
+    "minZoom": 2,
+    "x": 6617.980775756836,
+    "y": 11208.977199097008
+  },
+  {
+    "nameEN": "Tarnow",
+    "nameRU": null,
+    "lat": 77.48312715991617,
+    "lng": 82.35462474632261,
+    "spellings": [
+      "Tarnow"
+    ],
+    "type": "City",
+    "minZoom": 2,
+    "x": 9328.164435424804,
+    "y": 10902.803271484767
+  },
+  {
+    "nameEN": "Sitnik",
+    "nameRU": null,
+    "lat": 66.18899418023753,
+    "lng": 143.48717899131773,
+    "spellings": [
+      "Sitnik"
+    ],
+    "type": "Village",
+    "minZoom": 3,
+    "x": 11501.766364135741,
+    "y": 9571.257129517282
+  },
+  {
+    "nameEN": "Borek",
+    "nameRU": null,
+    "lat": 50.620871129037766,
+    "lng": 95.82909454536438,
+    "spellings": [
+      "Borek"
+    ],
+    "type": "Village",
+    "minZoom": 3,
+    "x": 9807.256694946289,
+    "y": 8493.514506226495
+  },
+  {
+    "nameEN": "Zapadlisko",
+    "nameRU": null,
+    "lat": 54.32947874871789,
+    "lng": 46.64072785377503,
+    "spellings": [
+      "Zapadlisko"
+    ],
+    "type": "Village",
+    "minZoom": 3,
+    "x": 8058.336990356445,
+    "y": 8710.164829102425
+  },
+  {
+    "nameEN": "Nidek",
+    "nameRU": null,
+    "lat": 41.23150565469869,
+    "lng": -7.612586248397829,
+    "spellings": [
+      "Nidek"
+    ],
+    "type": "Village",
+    "minZoom": 3,
+    "x": 6129.330266723633,
+    "y": 8011.8727136240595
+  },
+  {
+    "nameEN": "Topolin",
+    "nameRU": null,
+    "lat": 25.280373302041,
+    "lng": -127.68631481552126,
+    "spellings": [
+      "Topolin"
+    ],
+    "type": "City",
+    "minZoom": 2,
+    "x": 1860.0421398925782,
+    "y": 7329.527677613465
+  },
+  {
+    "nameEN": "Adamów",
+    "nameRU": null,
+    "lat": 12.554714430290675,
+    "lng": -93.45067844581604,
+    "spellings": [
+      "Adamów",
+      "Adamow"
+    ],
+    "type": "Village",
+    "minZoom": 3,
+    "x": 3077.3092108154297,
+    "y": 6850.0054968274335
+  },
+  {
+    "nameEN": "Muratyn",
+    "nameRU": null,
+    "lat": -0.4716233208675635,
+    "lng": -51.518639087677,
+    "spellings": [
+      "Muratyn"
+    ],
+    "type": "Village",
+    "minZoom": 3,
+    "x": 4568.226165771484,
+    "y": 6383.2309814466735
+  },
+  {
+    "nameEN": "Radunin",
+    "nameRU": null,
+    "lat": 2.550412589832143,
+    "lng": 25.273297313690193,
+    "spellings": [
+      "Radunin"
+    ],
+    "type": "City",
+    "minZoom": 2,
+    "x": 7298.606126708984,
+    "y": 6490.71129760876
+  },
+  {
+    "nameEN": "Lembork",
+    "nameRU": null,
+    "lat": 6.580375575402969,
+    "lng": 64.13746101951597,
+    "spellings": [
+      "Lembork"
+    ],
+    "type": "Village",
+    "minZoom": 3,
+    "x": 8680.44305847168,
+    "y": 6634.484967042324
+  },
+  {
+    "nameEN": "Gieraltów",
+    "nameRU": null,
+    "lat": -49.29866465117064,
+    "lng": 136.11162349319457,
+    "spellings": [
+      "Gieraltów",
+      "Gieraltow"
+    ],
+    "type": "Village",
+    "minZoom": 3,
+    "x": 11239.524390869141,
+    "y": 4379.5679302996405
+  },
+  {
+    "nameEN": "Nadbór",
+    "nameRU": null,
+    "lat": -56.053339994084034,
+    "lng": -8.157830142974852,
+    "spellings": [
+      "Nadbór",
+      "Nadbor"
+    ],
+    "type": "City",
+    "minZoom": 2,
+    "x": 6109.943817138672,
+    "y": 3982.4406597919137
+  },
+  {
+    "nameEN": "Zalesie",
+    "nameRU": null,
+    "lat": -23.62568151169652,
+    "lng": -154.75841935729983,
+    "spellings": [
+      "Zalesie"
+    ],
+    "type": "Village",
+    "minZoom": 3,
+    "x": 897.4784228515618,
+    "y": 5535.106306153886
+  },
+  {
+    "nameEN": "Huta",
+    "nameRU": null,
+    "lat": -25.24716594136927,
+    "lng": -35.37868869209289,
+    "spellings": [
+      "Huta"
+    ],
+    "type": "Village",
+    "minZoom": 3,
+    "x": 5142.091068725586,
+    "y": 5471.77790405429
+  },
+  {
+    "nameEN": "Radacz",
+    "nameRU": null,
+    "lat": 39.6602432518998,
+    "lng": -67.25788161849975,
+    "spellings": [
+      "Radacz"
+    ],
+    "type": "Village",
+    "minZoom": 3,
+    "x": 4008.6086535644536,
+    "y": 7938.456159058646
+  },
+  {
+    "nameEN": "Olszanka",
+    "nameRU": null,
+    "lat": 33.671102089837134,
+    "lng": -44.445653177261356,
+    "spellings": [
+      "Olszanka"
+    ],
+    "type": "Village",
+    "minZoom": 3,
+    "x": 4819.71010925293,
+    "y": 7672.724824830188
+  },
+  {
+    "nameEN": "Lipina",
+    "nameRU": null,
+    "lat": 11.695581713104307,
+    "lng": -12.8715606250763,
+    "spellings": [
+      "Lipina"
+    ],
+    "type": "Village",
+    "minZoom": 3,
+    "x": 5942.344511108398,
+    "y": 6818.761218873338
+  },
+  {
+    "nameEN": "Kolembrody",
+    "nameRU": null,
+    "lat": 82.60327431312793,
+    "lng": 56.72731810569768,
+    "spellings": [
+      "Kolembrody"
+    ],
+    "type": "Village",
+    "minZoom": 3,
+    "x": 8416.971310424806,
+    "y": 11979.736043090987
+  },
+  {
+    "nameEN": "Karlin",
+    "nameRU": null,
+    "lat": 15.43839451585946,
+    "lng": 103.28788479995728,
+    "spellings": [
+      "Karlin"
+    ],
+    "type": "Village",
+    "minZoom": 3,
+    "x": 10072.458126220703,
+    "y": 6955.686142579364
+  },
+  {
+    "nameEN": "Sobotka",
+    "nameRU": null,
+    "lat": 72.82473511126669,
+    "lng": -4.011839435577404,
+    "spellings": [
+      "Sobotka"
+    ],
+    "type": "Village",
+    "minZoom": 3,
+    "x": 6257.356820068359,
+    "y": 10251.04263427788
+  },
+  {
+    "nameEN": "Roztoka",
+    "nameRU": null,
+    "lat": -29.1307568156573,
+    "lng": 36.43406584167479,
+    "spellings": [
+      "Roztoka"
+    ],
+    "type": "Village",
+    "minZoom": 3,
+    "x": 7695.433452148437,
+    "y": 5316.496342164675
+  },
+  {
+    "nameEN": "Polana",
+    "nameRU": null,
+    "lat": -75.97007882422942,
+    "lng": -87.73391290855407,
+    "spellings": [
+      "Polana"
+    ],
+    "type": "Village",
+    "minZoom": 3,
+    "x": 3280.571985473633,
+    "y": 2131.7595916770742
+  },
+  {
+    "nameEN": "Dolnik",
+    "nameRU": null,
+    "lat": -83.17617439541908,
+    "lng": 138.14665704917908,
+    "spellings": [
+      "Dolnik"
+    ],
+    "type": "Village",
+    "minZoom": 3,
+    "x": 11311.881139526367,
+    "y": 655.6099322535683
+  },
+  {
+    "nameEN": "Sowa",
+    "nameRU": null,
+    "lat": 82.895668545684,
+    "lng": 147.99929014778144,
+    "spellings": [
+      "Sowa"
+    ],
+    "type": "Hill",
+    "minZoom": 6,
+    "x": 11662.196983032229,
+    "y": 12062.12095520034
+  },
+  {
+    "nameEN": "Krsnik",
+    "nameRU": null,
+    "lat": 71.34046319834552,
+    "lng": 41.48579692268372,
+    "spellings": [
+      "Krsnik"
+    ],
+    "type": "Hill",
+    "minZoom": 6,
+    "x": 7875.050557250976,
+    "y": 10079.404067993737
+  },
+  {
+    "nameEN": "Dambog",
+    "nameRU": null,
+    "lat": -81.41609938872817,
+    "lng": -163.72358998489383,
+    "spellings": [
+      "Dambog"
+    ],
+    "type": "Hill",
+    "minZoom": 6,
+    "x": 578.7168005371077,
+    "y": 1124.4840631128354
+  },
+  {
+    "nameEN": "Skala",
+    "nameRU": null,
+    "lat": -77.12140583671989,
+    "lng": -95.61759409904481,
+    "spellings": [
+      "Skala"
+    ],
+    "type": "Hill",
+    "minZoom": 6,
+    "x": 3000.263320922851,
+    "y": 1955.7118328880515
+  },
+  {
+    "nameEN": "Swarog",
+    "nameRU": null,
+    "lat": -75.32812890306779,
+    "lng": -43.43474456405641,
+    "spellings": [
+      "Swarog"
+    ],
+    "type": "Hill",
+    "minZoom": 6,
+    "x": 4855.653526611328,
+    "y": 2223.862724001274
+  },
+  {
+    "nameEN": "Rodzanica",
+    "nameRU": null,
+    "lat": -76.57188335907763,
+    "lng": 69.79151929092411,
+    "spellings": [
+      "Rodzanica"
+    ],
+    "type": "Hill",
+    "minZoom": 6,
+    "x": 8881.476241455079,
+    "y": 2041.5861059593226
+  },
+  {
+    "nameEN": "Bagno",
+    "nameRU": null,
+    "lat": 78.80864812676276,
+    "lng": 152.49959096717836,
+    "spellings": [
+      "Bagno"
+    ],
+    "type": "Local",
+    "minZoom": 4,
+    "x": 11822.207678833009,
+    "y": 11132.471210327494
+  },
+  {
+    "nameEN": "Wrzeszcz",
+    "nameRU": null,
+    "lat": -48.22153800739842,
+    "lng": 74.33878026008607,
+    "spellings": [
+      "Wrzeszcz"
+    ],
+    "type": "Local",
+    "minZoom": 4,
+    "x": 9043.156631469727,
+    "y": 4437.667290040838
+  },
+  {
+    "nameEN": "Drewniki",
+    "nameRU": null,
+    "lat": -34.493780306987574,
+    "lng": -15.884602569580055,
+    "spellings": [
+      "Drewniki"
+    ],
+    "type": "Local",
+    "minZoom": 4,
+    "x": 5835.2141308593755,
+    "y": 5091.957463990895
+  },
+  {
+    "nameEN": "Kulno",
+    "nameRU": null,
+    "lat": -74.08860438438637,
+    "lng": 133.58083697891237,
+    "spellings": [
+      "Kulno"
+    ],
+    "type": "Local",
+    "minZoom": 4,
+    "x": 11149.540870361328,
+    "y": 2391.0621032736976
+  },
+  {
+    "nameEN": "Hrud",
+    "nameRU": null,
+    "lat": 63.790736246619254,
+    "lng": 1.4872784614563173,
+    "spellings": [
+      "Hrud"
+    ],
+    "type": "Local",
+    "minZoom": 4,
+    "x": 6452.8810119628915,
+    "y": 9369.414094849353
+  },
+  {
+    "nameEN": "Jantar",
+    "nameRU": null,
+    "lat": 58.12989267599833,
+    "lng": -80.62690197944642,
+    "spellings": [
+      "Jantar"
+    ],
+    "type": "Marine",
+    "minZoom": 5,
+    "x": 3533.2657073974606,
+    "y": 8953.50026489339
+  },
+  {
+    "nameEN": "Grabinskie",
+    "nameRU": null,
+    "lat": 78.0106676243006,
+    "lng": 136.37088851165774,
+    "spellings": [
+      "Grabinskie"
+    ],
+    "type": "Marine",
+    "minZoom": 5,
+    "x": 11248.742702636719,
+    "y": 10991.197083130257
+  },
+  {
+    "nameEN": "Wolisko",
+    "nameRU": null,
+    "lat": 77.35548516455509,
+    "lng": 167.8434684047699,
+    "spellings": [
+      "Wolisko"
+    ],
+    "type": "Marine",
+    "minZoom": 5,
+    "x": 12367.76776550293,
+    "y": 10881.967087402743
+  },
+  {
+    "nameEN": "Sitnickie",
+    "nameRU": null,
+    "lat": 74.3087869371576,
+    "lng": 140.94514453697207,
+    "spellings": [
+      "Sitnickie"
+    ],
+    "type": "Marine",
+    "minZoom": 5,
+    "x": 11411.382916870118,
+    "y": 10437.688452148934
+  },
+  {
+    "nameEN": "Grabin",
+    "nameRU": null,
+    "lat": 78.19823183477581,
+    "lng": 119.97645347213744,
+    "spellings": [
+      "Grabin"
+    ],
+    "type": "Village",
+    "minZoom": 3,
+    "x": 10665.829456787109,
+    "y": 11023.551157837283
+  },
+  {
+    "nameEN": "castle",
+    "nameRU": "Branzow Castle",
+    "lat": 80.25845639765915,
+    "lng": -149.79639059829714,
+    "spellings": [
+      "castle",
+      "Branzow Castle"
+    ],
+    "type": "Ruin",
+    "minZoom": 5,
+    "x": 1073.9061120605475,
+    "y": 11416.689158935827
+  },
+  {
+    "nameEN": "Piorun",
+    "nameRU": null,
+    "lat": 83.21610364563624,
+    "lng": -161.80159822654724,
+    "spellings": [
+      "Piorun"
+    ],
+    "type": "Hill",
+    "minZoom": 6,
+    "x": 647.0542852783201,
+    "y": 12156.373693847778
+  },
+  {
+    "nameEN": "Jezurów",
+    "nameRU": null,
+    "lat": -74.36098088841065,
+    "lng": -120.96735781860353,
+    "spellings": [
+      "Jezurów",
+      "Jezurow"
+    ],
+    "type": "Local",
+    "minZoom": 4,
+    "x": 2098.938388671875,
+    "y": 2355.4386273215605
+  },
+  {
+    "nameEN": "Tymbark",
+    "nameRU": null,
+    "lat": -81.00118567494123,
+    "lng": -98.33959559440615,
+    "spellings": [
+      "Tymbark"
+    ],
+    "type": "Local",
+    "minZoom": 4,
+    "x": 2903.4810455322263,
+    "y": 1221.0263824487583
+  },
+  {
+    "nameEN": "Hedryków",
+    "nameRU": null,
+    "lat": -41.09377837895276,
+    "lng": -53.05173331832887,
+    "spellings": [
+      "Hedryków",
+      "Hedrykow"
+    ],
+    "type": "Local",
+    "minZoom": 4,
+    "x": 4513.71614868164,
+    "y": 4794.631915895256
+  },
+  {
+    "nameEN": "Widok",
+    "nameRU": null,
+    "lat": -75.89194749287441,
+    "lng": 107.94987475776676,
+    "spellings": [
+      "Widok"
+    ],
+    "type": "Local",
+    "minZoom": 4,
+    "x": 10238.21776916504,
+    "y": 2143.1874987815627
+  },
+  {
+    "nameEN": "Kopa",
+    "nameRU": null,
+    "lat": 55.23511127327998,
+    "lng": -24.767944433212264,
+    "spellings": [
+      "Kopa"
+    ],
+    "type": "Hill",
+    "minZoom": 6,
+    "x": 5519.361975708009,
+    "y": 8766.004602661986
+  },
+  {
+    "nameEN": "Max",
+    "nameRU": "KAMIENIOŁOM MAKSYMILIAN",
+    "lat": -39.97502238193489,
+    "lng": 3.1674395084381035,
+    "spellings": [
+      "Max",
+      "KAMIENIOŁOM MAKSYMILIAN"
+    ],
+    "type": "Local",
+    "minZoom": 4,
+    "x": 6512.620071411133,
+    "y": 4846.972330323955
+  },
+  {
+    "nameEN": "Piekło",
+    "nameRU": null,
+    "lat": -60.00697512191235,
+    "lng": -86.48960953903199,
+    "spellings": [
+      "Piekło"
+    ],
+    "type": "Local",
+    "minZoom": 4,
+    "x": 3324.8138830566404,
+    "y": 3716.6193420429468
+  },
+  {
+    "nameEN": "Sarnówek",
+    "nameRU": null,
+    "lat": -37.28707607241822,
+    "lng": -86.93390317153931,
+    "spellings": [
+      "Sarnówek",
+      "Sarnowek"
+    ],
+    "type": "Village",
+    "minZoom": 3,
+    "x": 3309.016776123047,
+    "y": 4969.339920045608
+  },
+  {
+    "nameEN": "Konopki",
+    "nameRU": null,
+    "lat": -69.68249821952709,
+    "lng": 143.12893210029605,
+    "spellings": [
+      "Konopki"
+    ],
+    "type": "Village",
+    "minZoom": 3,
+    "x": 11489.028696899415,
+    "y": 2897.39937317105
+  },
+  {
+    "nameEN": "Pionier",
+    "nameRU": null,
+    "lat": -39.5578636492894,
+    "lng": -142.23468169212344,
+    "spellings": [
+      "Pionier"
+    ],
+    "type": "Camp",
+    "minZoom": 5,
+    "x": 1342.7668731689446,
+    "y": 4866.268796388404
+  },
+  {
+    "nameEN": "Potoki",
+    "nameRU": null,
+    "lat": -77.17688092615366,
+    "lng": 147.1866264781952,
+    "spellings": [
+      "Potoki"
+    ],
+    "type": "Camp",
+    "minZoom": 5,
+    "x": 11633.302274780273,
+    "y": 1946.8434570335612
+  },
+  {
+    "nameEN": "Rumianek",
+    "nameRU": null,
+    "lat": -24.883431246674416,
+    "lng": 151.17205284118654,
+    "spellings": [
+      "Rumianek"
+    ],
+    "type": "Camp",
+    "minZoom": 5,
+    "x": 11775.006323242187,
+    "y": 5486.055289308195
+  },
+  {
+    "nameEN": "Lawenda",
+    "nameRU": null,
+    "lat": 52.564305188892924,
+    "lng": -157.07633860588075,
+    "spellings": [
+      "Lawenda"
+    ],
+    "type": "Camp",
+    "minZoom": 5,
+    "x": 815.063516235351,
+    "y": 8604.764132080965
+  },
+  {
+    "nameEN": "Tymianka",
+    "nameRU": null,
+    "lat": 71.17312363855035,
+    "lng": 139.25289195442198,
+    "spellings": [
+      "Tymianka"
+    ],
+    "type": "Camp",
+    "minZoom": 5,
+    "x": 11351.213936157226,
+    "y": 10060.88745910702
+  },
+  {
+    "nameEN": "Półkrabiec",
+    "nameRU": null,
+    "lat": 5.028333261086,
+    "lng": 153.86340369987485,
+    "spellings": [
+      "Półkrabiec",
+      "Połkrabiec"
+    ],
+    "type": "Ruin",
+    "minZoom": 5,
+    "x": 11870.698798217772,
+    "y": 6579.015125733742
+  }
+]

@@ -37,7 +37,7 @@ passport.use(
           services: guild.services.map(service => ({
             serviceId: service.ServerInfo?.nitrado_service_id || "Unknown",
             serviceName: service.ServerInfo?.server_name || "Unnamed Service",
-            mapLoc: service.ServerInfo?.mapLoc || "chernarus"
+            mapLoc: Number(service.ServerInfo?.mapLoc ?? 0)
           }))
         }));
 

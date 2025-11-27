@@ -26,7 +26,20 @@ export async function loadMapData(map) {
 }
 
 export async function loadCityData(map) {
-  const response = await fetch("/dayzdata/citynames_xy.json");
+  const mapName = map?.options?.mapName || 'Chernarus';
+  const cityFiles = {
+    Chernarus: "/dayzdata/citynames_xy.json",
+    Livonia: "/dayzdata/citynames_livonia.json",
+    Sakhal: "/dayzdata/citynames_sakhal.json",
+  };
+
+  const primaryCityFile = cityFiles[mapName] || cityFiles.Chernarus;
+  let response = await fetch(primaryCityFile);
+
+  if (!response.ok && primaryCityFile !== cityFiles.Chernarus) {
+    // Fallback to default Chernarus data when map-specific file is missing
+    response = await fetch(cityFiles.Chernarus);
+  }
 
   if (!response.ok) {
     console.error("❌ Failed to fetch citynames.json:", response.status);
@@ -42,7 +55,7 @@ export async function loadCityData(map) {
 
   cities.forEach((city) => {
     const { x, y, nameEN, type, minZoom } = city;
-    const latLng = mapDayZToLeaflet(x, y);
+    const latLng = mapDayZToLeaflet(x, y, map);
 
     // console.log(`📍 Creating marker for: ${nameEN} at`, latLng);
 
