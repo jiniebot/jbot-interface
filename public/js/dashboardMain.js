@@ -12,14 +12,19 @@ import {
   loadMonitorZones,
   loadActiveObjSps
 } from "./map/dataLoader.js";
+import { setupZoneDrawing } from "./map/zoneDrawing.js";
 
 // Create layer groups for all data types
 let recentPlayersLayer = L.layerGroup();
 let baseClusterGroup = L.layerGroup();
 let monitorZonesLayer = L.layerGroup();
 let activeObjClusterGroup = L.layerGroup();
+const loadingOverlay = document.getElementById('page-loading-overlay');
+const showOverlay = () => loadingOverlay?.classList.remove('hidden');
+const hideOverlay = () => loadingOverlay?.classList.add('hidden');
 
 (async function main() {
+  showOverlay();
   const mapInstance = initializeMap();
   const { map, tileLayers, getCurrentLayer, setCurrentLayer } = mapInstance;
 
@@ -54,11 +59,22 @@ let activeObjClusterGroup = L.layerGroup();
   // Handle map type switching
   handleMapType(document, map, tileLayers, currentLayer);
 
-  // Load data layers
-  await loadRecentPlayers(map, recentPlayersLayer);
-  await loadBases(map, baseClusterGroup);
-  await loadMonitorZones(map, monitorZonesLayer);
-  await loadActiveObjSps(map, activeObjClusterGroup);
+  // Load data layers in parallel
+  await Promise.all([
+    loadRecentPlayers(map, recentPlayersLayer),
+    loadBases(map, baseClusterGroup),
+    loadMonitorZones(map, monitorZonesLayer),
+    loadActiveObjSps(map, activeObjClusterGroup)
+  ]);
+
+  // Enable drawing new monitor zones directly on the map
+  setupZoneDrawing(map, {
+    onZoneCreated: async () => {
+      await loadMonitorZones(map, monitorZonesLayer);
+    },
+  });
+
+  hideOverlay();
 
   // Layer toggles are now handled by filter panel checkboxes in dashboard-new.ejs
   // Wire top-level filter checkboxes (recent players, bases, monitor zones, spawned objects)
@@ -138,7 +154,7 @@ window.deleteBase = async function(baseId) {
 
 window.toggleZone = async function(zoneId, enable) {
   try {
-    const response = await fetch(`/api/zones/${zoneId}/toggle`, {
+    const response = await fetch(`/api/monitorZones/${zoneId}/toggle`, {
       method: 'POST'
     });
 
@@ -158,7 +174,7 @@ window.deleteZone = async function(zoneId) {
   if (!confirm('Delete this zone?')) return;
 
   try {
-    const response = await fetch(`/api/zones/${zoneId}`, {
+    const response = await fetch(`/api/monitorZones/${zoneId}`, {
       method: 'DELETE'
     });
 

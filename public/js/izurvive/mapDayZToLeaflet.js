@@ -78,5 +78,28 @@ function scaleToLeaflet(radius, map) {
   }
 }
 
+/**
+ * Convert Leaflet LatLng back into DayZ XZ coordinates.
+ * @param {L.LatLng} latLng - Leaflet coordinate to convert.
+ * @param {L.Map} map - Leaflet map instance for projection context.
+ * @returns {{x: number, z: number}} - DayZ coordinates.
+ */
+function mapLeafletToDayZ(latLng, map) {
+  if (!latLng || !map?.project) {
+    console.error("❌ mapLeafletToDayZ missing LatLng or map instance");
+    return { x: 0, z: 0 };
+  }
 
-export { mapDayZToLeaflet, scaleToLeaflet };
+  const mapName = resolveMapName(map);
+  const mapSize = MAP_SIZES[mapName] || MAP_SIZES.Chernarus;
+
+  // Project lat/lng into pixel space at tile max zoom (same space used in mapDayZToLeaflet)
+  const point = map.project(latLng, TILE_MAX_ZOOM);
+
+  const x = (point.x / WORLD_SIZE) * mapSize;
+  const z = ((WORLD_SIZE - point.y) / WORLD_SIZE) * mapSize;
+
+  return { x, z };
+}
+
+export { mapDayZToLeaflet, scaleToLeaflet, mapLeafletToDayZ };

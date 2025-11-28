@@ -379,6 +379,45 @@ export async function loadBases(map, layerGroup) {
   try {
     const data = await fetchWithRetry('/bases');
     const bases = data.bases || [];
+
+    // Fetch Discord roles and users to show names instead of IDs
+    let roleMap = {};
+    try {
+      if (cachedRoles === null) {
+        const roleResp = await fetch('/api/discord/roles');
+        if (roleResp.ok) {
+          const roleData = await roleResp.json();
+          cachedRoles = roleData.roles || [];
+        } else {
+          cachedRoles = [];
+        }
+      }
+      (cachedRoles || []).forEach((r) => {
+        roleMap[r.id] = r.name;
+      });
+    } catch (e) {
+      cachedRoles = [];
+    }
+
+    let userMap = {};
+    const ownerIds = [...new Set(bases.map((b) => b.owner_userID).filter(Boolean))];
+    if (ownerIds.length) {
+      const uncached = ownerIds.filter((id) => !cachedUsers[id]);
+      if (uncached.length) {
+        try {
+          const userResp = await fetch(`/api/discord/users?id=${uncached.join(',')}`);
+          if (userResp.ok) {
+            const userData = await userResp.json();
+            Object.assign(cachedUsers, userData.users || {});
+          }
+        } catch (e) {
+          // ignore if not configured
+        }
+      }
+      ownerIds.forEach((id) => {
+        if (cachedUsers[id]) userMap[id] = cachedUsers[id];
+      });
+    }
     
     // Load flag icon mappings
     const flagResponse = await fetch('/dayzdata/flagOptions.json');
@@ -391,6 +430,17 @@ export async function loadBases(map, layerGroup) {
     
     bases.forEach((base) => {
       const latLng = mapDayZToLeaflet(base.flagLoc[0], base.flagLoc[2], map);
+
+      const ownerLabel = (() => {
+        const info = userMap[base.owner_userID];
+        if (!info) return base.owner_userID || 'Unknown';
+        return info.display_name || info.global_name || info.username || base.owner_userID;
+      })();
+
+      const factionLabel = (() => {
+        if (!base.factionID) return 'None';
+        return roleMap[base.factionID] || base.factionID;
+      })();
       
       const flagIconURL = flagMap[base.flagName] || 
         'https://raw.githubusercontent.com/jiniebot/JJDZAM_images/8f963d2b025e82322867638b1cb9443921ce8478/Flag_White.png';
@@ -408,8 +458,8 @@ export async function loadBases(map, layerGroup) {
       
       marker.bindPopup(`
         <strong>${base.baseName}</strong><br>
-        Owner: ${base.owner_userID}<br>
-        Faction: ${base.factionID || "None"}<br>
+        Owner: ${ownerLabel}<br>
+        Faction: ${factionLabel}<br>
         Structures: ${base.structures.length}
       `);
       
@@ -418,8 +468,8 @@ export async function loadBases(map, layerGroup) {
           <h3>Base Information</h3>
           <div class="ios-card">
             <strong>Name:</strong> ${base.baseName}<br>
-            <strong>Owner:</strong> ${base.owner_userID}<br>
-            <strong>Faction:</strong> ${base.factionID || 'None'}<br>
+            <strong>Owner:</strong> ${ownerLabel}<br>
+            <strong>Faction:</strong> ${factionLabel}<br>
             <strong>Structures:</strong> ${base.structures.length}<br>
             <strong>Location:</strong> ${base.flagLoc.join(', ')}
           </div>
@@ -498,12 +548,37 @@ export async function loadBases(map, layerGroup) {
 /**
  * Load Monitor Zones
  */
+// Shared cache for Discord lookups (per page load)
+let cachedChannels = null;
+let cachedRoles = null;
+let cachedUsers = {};
+
 export async function loadMonitorZones(map, layerGroup) {
   showLoading('Monitor Zones');
+  layerGroup.clearLayers();
   
   try {
     const data = await fetchWithRetry('/monitorZones');
     const zones = data.monitorZones || [];
+
+    // Fetch Discord channels once for display (ignore failures silently)
+    let channelMap = {};
+    try {
+      if (cachedChannels === null) {
+        const chResp = await fetch('/api/discord/channels');
+        if (chResp.ok) {
+          const chData = await chResp.json();
+          cachedChannels = chData.channels || [];
+        } else {
+          cachedChannels = [];
+        }
+      }
+      (cachedChannels || []).forEach((ch) => {
+        channelMap[ch.id] = ch.name;
+      });
+    } catch (e) {
+      cachedChannels = [];
+    }
     
     // Create a shared SVG renderer with extra padding to prevent clipping
     const sharedRenderer = L.svg({ padding: 2.0 });
@@ -547,10 +622,12 @@ export async function loadMonitorZones(map, layerGroup) {
         // Use circleMarker with pixel radius (not affected by projection bounds)
         shape = L.circleMarker(latLng, {
           radius: radiusInPixels,
-          stroke: false,
-          color: "blue",
-          fillOpacity: 1,
-          strokeOpacity: 0.1,
+          stroke: true,
+          color: "rgba(255,255,255,0.55)", // soft white stroke
+          weight: 2,
+          fillColor: "rgba(120, 144, 180, 0.2)", // greyish blue fill at 20%
+          fillOpacity: 0.2,
+          opacity: 0.8,
           renderer: sharedRenderer
         });
         
@@ -579,9 +656,11 @@ export async function loadMonitorZones(map, layerGroup) {
         );
         
         shape = L.polygon(polygonCoords, {
-          color: "red",
-          fillColor: "red",
-          fillOpacity: 0.2
+          color: "rgba(255,255,255,0.55)", // soft white stroke
+          weight: 2,
+          fillColor: "rgba(90, 120, 100, 0.2)", // greyish green fill at 20%
+          fillOpacity: 0.2,
+          opacity: 0.8
         });
       }
       
@@ -601,6 +680,7 @@ export async function loadMonitorZones(map, layerGroup) {
               <strong>Type:</strong> ${zone.type}<br>
               <strong>Zone Type:</strong> ${zone.zoneType === 0 ? 'Circular' : 'Polygon'}<br>
               ${zone.range ? `<strong>Range:</strong> ${zone.range}m<br>` : ''}
+              ${zone.radarChannel ? `<strong>Channel:</strong> ${channelMap[zone.radarChannel] ? `#${channelMap[zone.radarChannel]} (${zone.radarChannel})` : zone.radarChannel}<br>` : ''}
               <strong>Active:</strong> <span class="ios-badge ${zone.isActive ? 'success' : 'danger'}">${zone.isActive ? 'Yes' : 'No'}</span>
             </div>
             ${zone.description ? `<div class="ios-card"><p>${zone.description}</p></div>` : ''}

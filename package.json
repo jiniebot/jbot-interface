@@ -30,6 +30,7 @@
     "hpp": "^0.2.3",
     "leaflet": "^1.9.4",
     "mongoose": "^8.9.5",
+    "node-fetch": "^3.3.2",
     "p-map": "^7.0.3",
     "passport": "^0.7.0",
     "passport-discord": "^0.1.4"
