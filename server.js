@@ -158,6 +158,19 @@ rawProxy.on('proxyReqWs', (proxyReq, req, socket, options, head) => {
   }
 });
 
+// Additional event handlers for debugging
+rawProxy.on('open', (proxySocket) => {
+  console.log('[Raw Proxy] ✅ WebSocket connection opened to backend');
+});
+
+rawProxy.on('close', (res, socket, head) => {
+  console.log('[Raw Proxy] ⚠️ WebSocket connection closed');
+});
+
+rawProxy.on('proxyRes', (proxyRes, req, res) => {
+  console.log('[Raw Proxy] Response from backend:', proxyRes.statusCode);
+});
+
 // Create the proxy middleware for HTTP requests
 const queueApiProxy = createProxyMiddleware({
   target: QUEUE_API_URL,
