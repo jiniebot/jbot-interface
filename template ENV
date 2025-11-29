@@ -36,10 +36,24 @@ COOKIE_DOMAIN=
 # Set to true in production when using HTTPS
 # SECURE_COOKIES=true
 
-# Queue Manager API
-# Base URL and optional API key for the queue manager process (separate droplet)
-QUEUE_API_BASE=http://localhost:4310
-QUEUE_API_KEY=
+# Queue API Configuration (Backend Service)
+# IMPORTANT SECURITY SETUP:
+# 1. Generate a strong API key: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+# 2. Use the SAME API_KEY or DASHBOARD_API_KEY on both frontend and backend .env files
+# 3. For multi-droplet: Set QUEUE_API_URL to backend's PRIVATE IP (e.g., http://10.108.0.2:4310)
+# 4. Configure backend firewall to ONLY allow port 4310 from frontend's private IP
+# 5. Backend should listen on 0.0.0.0 but be blocked by firewall from external access
+
+# Frontend Server (this file) - connects TO the Queue API
+QUEUE_API_URL=http://localhost:4310
+DASHBOARD_API_KEY=GENERATE_SECURE_RANDOM_KEY_HERE
+API_KEY=GENERATE_SECURE_RANDOM_KEY_HERE
+
+# Backend Queue API Server - SET THESE on the backend droplet's .env:
+# API_HOST=0.0.0.0
+# API_PORT=4310
+# DASHBOARD_API_KEY=SAME_KEY_AS_FRONTEND
+# API_KEY=SAME_KEY_AS_FRONTEND
 
 # Queue API CFG cache (ms)
 CFG_CACHE_TTL_MS=300000

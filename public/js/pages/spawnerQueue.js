@@ -360,13 +360,15 @@ function renderQueue(hasError = false) {
       setTimeout(() => div.classList.remove('queue-item-new'), 500);
     }
     
+    const isProcessing = state.queueStatus.isProcessing;
+    
     div.innerHTML = `
       <div class="queue-meta">
         <div class="queue-file">${item.fileName || "Unnamed"}</div>
         <div class="queue-action">${formatActionLabel(item.action)}</div>
       </div>
       <div class="queue-actions">
-        <button class="ios-button ghost" data-id="${identifier}" aria-label="remove">Remove</button>
+        <button class="ios-button ghost" data-id="${identifier}" aria-label="remove" ${isProcessing ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>Remove</button>
       </div>
     `;
 
@@ -451,11 +453,21 @@ function buildPill(name, actions = [], tight = false) {
   if (actions.length) {
     const actionsEl = document.createElement("div");
     actionsEl.className = "pill-actions";
+    const isProcessing = state.queueStatus.isProcessing;
+    
     actions.forEach(({ label, action }) => {
       const btn = document.createElement("button");
       btn.className = "ios-button ghost";
       btn.textContent = label;
       btn.addEventListener("click", action);
+      
+      // Disable buttons during processing
+      if (isProcessing) {
+        btn.disabled = true;
+        btn.style.opacity = "0.5";
+        btn.style.cursor = "not-allowed";
+      }
+      
       actionsEl.appendChild(btn);
     });
     pill.appendChild(actionsEl);
@@ -953,13 +965,13 @@ function updateProcessingUI() {
 function initializeSocket() {
   console.log('📡 Initializing Socket.io connection to Queue API...');
   
-  // Connect to the queue API server - use environment variable or default to localhost
-  const queueApiUrl = window.queueContext.queueApiUrl || 'http://localhost:4310';
-  console.log('📡 Connecting to Queue API at:', queueApiUrl);
+  // Connect via the proxied endpoint on the same origin
+  console.log('📡 Connecting to Queue API via proxy at: /queue-api/socket.io/');
   
-  // Force polling transport for HTTP connections to avoid wss:// upgrade issues
-  socket = io(queueApiUrl, {
-    transports: ['polling'],
+  // Socket.io requires explicit path configuration to use /queue-api/socket.io/ instead of /socket.io/
+  socket = io({
+    path: '/queue-api/socket.io/',
+    transports: ['websocket', 'polling'],
     reconnectionDelay: 1000,
     reconnectionDelayMax: 5000,
     reconnectionAttempts: Infinity

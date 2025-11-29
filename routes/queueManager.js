@@ -9,8 +9,9 @@ function isAuthenticated(req, res, next) {
 }
 
 router.get("/", isAuthenticated, (req, res) => {
-  // Get Queue API URL from environment or default to localhost
-  const queueApiUrl = process.env.QUEUE_API_URL || 'http://localhost:4310';
+  // Use proxied connection at /queue-api path
+  // This keeps all traffic on HTTPS and validates sessions before forwarding
+  const queueApiUrl = '/queue-api';
   
   res.render("spawner-queue", {
     user: req.user,

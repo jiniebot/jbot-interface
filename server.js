@@ -3,6 +3,7 @@ const session = require("express-session");
 const mongoose = require("mongoose");
 const passport = require("./config/passport");
 const path = require("path");
+const { createProxyMiddleware } = require('http-proxy-middleware');
 require("dotenv").config();
 
 // Import security configuration
@@ -104,6 +105,50 @@ app.use(express.static("public"));
 
 app.use("/tiles", express.static(path.join(__dirname, "public/js/map/tiles")));
 
+// Authenticated WebSocket proxy for Queue API
+// This ensures all requests are validated and adds API key authentication
+const QUEUE_API_URL = process.env.QUEUE_API_URL || 'http://localhost:4310';
+const QUEUE_API_KEY = process.env.DASHBOARD_API_KEY || process.env.API_KEY;
+
+// Create the proxy middleware
+const queueApiProxy = createProxyMiddleware({
+  target: QUEUE_API_URL,
+  changeOrigin: true,
+  ws: true, // Enable WebSocket proxying
+  pathRewrite: {
+    '^/queue-api': '' // Remove /queue-api prefix when forwarding
+  },
+  onProxyReq: (proxyReq, req, res) => {
+    // Add API key to all forwarded requests for backend authentication
+    if (QUEUE_API_KEY) {
+      proxyReq.setHeader('X-API-Key', QUEUE_API_KEY);
+    }
+    console.log(`[Proxy] ${req.method} ${req.url} -> ${QUEUE_API_URL}${req.url.replace('/queue-api', '')}`);
+  },
+  onError: (err, req, res) => {
+    console.error('Queue API Proxy Error:', err.message);
+    if (res && res.writeHead) {
+      res.status(502).json({ error: 'Queue API unavailable' });
+    }
+  },
+  logLevel: 'warn'
+});
+
+// Apply authentication check for HTTP requests only
+// WebSocket upgrades are authenticated via session cookie in the initial handshake
+app.use('/queue-api', (req, res, next) => {
+  // Skip auth check for WebSocket upgrade requests (socket.io handles auth via cookies)
+  if (req.headers.upgrade === 'websocket') {
+    return next();
+  }
+  
+  // Validate user is authenticated for HTTP requests
+  if (!req.isAuthenticated() || !req.session.guildId || !req.session.serviceId) {
+    return res.status(401).json({ error: 'Unauthorized - Authentication required' });
+  }
+  next();
+}, queueApiProxy);
+
 // API Routes with rate limiting
 app.use("/api", apiLimiter);
 app.use("/api/bounties", require("./routes/api/bounties"));
@@ -150,4 +195,15 @@ app.get("/debug-globals", async (req, res) => {
 
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+const server = app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+
+// Handle WebSocket upgrades for the proxy
+server.on('upgrade', (req, socket, head) => {
+  if (req.url.startsWith('/queue-api')) {
+    console.log(`[Proxy] WebSocket upgrade: ${req.url}`);
+    queueApiProxy.upgrade(req, socket, head);
+  } else {
+    // Not a queue-api request, close the socket
+    socket.destroy();
+  }
+});

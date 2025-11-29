@@ -33,19 +33,11 @@ const helmetConfig = helmet({
         "https://raw.githubusercontent.com", // Map markers
         "https://maps.izurvive.com", // Map tiles
       ],
-      connectSrc: (() => {
-        const queueApiUrl = process.env.QUEUE_API_URL || 'http://localhost:4310';
-        const url = new URL(queueApiUrl);
-        const wsProtocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
-        
-        return [
-          "'self'",
-          "https://unpkg.com", // Allow sourcemap downloads from Leaflet CDN
-          "https:",
-          `${wsProtocol}//${url.host}`, // Queue API WebSocket connection
-          `${url.protocol}//${url.host}`, // Queue API HTTP connection
-        ];
-      })(),
+      connectSrc: [
+        "'self'", // WebSocket proxied through same origin for security
+        "https://unpkg.com", // Allow sourcemap downloads from Leaflet CDN
+        "https:",
+      ],
       fontSrc: [
         "'self'",
         "https://fonts.gstatic.com", // Google Fonts
