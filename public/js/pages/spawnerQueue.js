@@ -953,8 +953,10 @@ function updateProcessingUI() {
 function initializeSocket() {
   console.log('📡 Initializing Socket.io connection to Queue API...');
   
-  // Connect to the queue API server (separate port)
-  const queueApiUrl = 'http://localhost:4310'; // Queue API server port
+  // Connect to the queue API server - use environment variable or default to localhost
+  const queueApiUrl = window.queueContext.queueApiUrl || 'http://localhost:4310';
+  console.log('📡 Connecting to Queue API at:', queueApiUrl);
+  
   socket = io(queueApiUrl, {
     transports: ['websocket', 'polling'],
     reconnectionDelay: 1000,

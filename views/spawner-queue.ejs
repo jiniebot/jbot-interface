@@ -250,7 +250,8 @@
         window.queueContext = {
             guildId: '<%= guildId %>',
             serviceId: '<%= serviceId %>',
-            user: <%- JSON.stringify(user) %>
+            user: <%- JSON.stringify(user) %>,
+            queueApiUrl: '<%= queueApiUrl %>'
         };
     </script>
     <script src="/js/vendor/socket.io.min.js"></script>
