@@ -8,7 +8,7 @@ export function initializeMap() {
   const mapLoc = window.sessionData?.mapLoc || 0;
   
   // Map mapLoc numbers to map names (folder names in tiles directory)
-  const mapNames = { 0: 'Chernarus', 1: 'Sakhal', 2: 'Livonia' };
+  const mapNames = { 0: 'Chernarus', 3: 'Sakhal', 1: 'Livonia' };
   const mapName = mapNames[mapLoc] || 'Chernarus';
 
   // Define bounds for DayZ maps (approximately 15360 x 15360 for Chernarus)

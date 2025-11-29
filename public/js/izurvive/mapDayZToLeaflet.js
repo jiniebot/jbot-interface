@@ -11,7 +11,7 @@ const WORLD_SIZE = TILE_SIZE * Math.pow(2, TILE_MAX_ZOOM);
 function resolveMapName(map) {
   if (map?.options?.mapName) return map.options.mapName;
   const mapLoc = window.sessionData?.mapLoc || 0;
-  const mapNames = { 0: "Chernarus", 1: "Sakhal", 2: "Livonia" };
+  const mapNames = { 0: "Chernarus", 3: "Sakhal", 1: "Livonia" };
   return mapNames[mapLoc] || "Chernarus";
 }
 

@@ -26,9 +26,9 @@
                             // Choose map icon from ServerInfo.mapLoc (fallback to top-level mapLoc)
                             const mapLocValue = Number(service.ServerInfo?.mapLoc ?? service.mapLoc);
                             let mapIcon = 'chernarus.png'; // default 0
-                            if (mapLocValue === 1) {
+                            if (mapLocValue === 3) {
                                 mapIcon = 'sakhal.png';
-                            } else if (mapLocValue === 2) {
+                            } else if (mapLocValue === 1) {
                                 mapIcon = 'livonia.png';
                             }
                             %>
