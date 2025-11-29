@@ -11,7 +11,10 @@
     <!-- Background Image -->
     <div class="background-image"></div>
     
+    <% const showBack = (typeof showBackButton === 'boolean') ? showBackButton : true; %>
+    <% if (showBack) { %>
     <button class="back-btn" id="backBtn">Back</button>
+    <% } %>
     
     <div class="container">
         <h1 class="page-title">Select Your Service</h1>
@@ -19,7 +22,10 @@
         
         <div class="services-container">
             <div class="service-cards">
-                <% guild.services.forEach(service => { %>
+                <% guild.services.forEach(service => { 
+                    const subStatus = String(service.subscriptionStatus || '').toLowerCase();
+                    if (subStatus === 'inactive') { return; }
+                %>
                     <div class="service-card" data-service-id="<%= service.serviceId %>">
                         <div class="service-icon-container">
                             <%

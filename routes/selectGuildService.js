@@ -16,7 +16,8 @@ router.get("/", async (req, res) => {
       return req.session.save(() => res.redirect("/dashboard"));
     }
 
-    return req.session.save(() => res.render("selectService", { guild: selectedGuild }));
+    const showBackButton = req.user.availableGuilds.length > 1;
+    return req.session.save(() => res.render("selectService", { guild: selectedGuild, showBackButton }));
   }
 
   // Fetch all user guilds from Discord API using their OAuth token
