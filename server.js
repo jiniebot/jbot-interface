@@ -201,6 +201,13 @@ const server = app.listen(PORT, () => console.log(`🚀 Server running on http:/
 server.on('upgrade', (req, socket, head) => {
   if (req.url.startsWith('/queue-api')) {
     console.log(`[Proxy] WebSocket upgrade: ${req.url}`);
+    
+    // Add API key header for backend authentication
+    if (QUEUE_API_KEY) {
+      req.headers['x-api-key'] = QUEUE_API_KEY;
+      console.log('[Proxy] Added X-API-Key header to WebSocket upgrade');
+    }
+    
     queueApiProxy.upgrade(req, socket, head);
   } else {
     // Not a queue-api request, close the socket
