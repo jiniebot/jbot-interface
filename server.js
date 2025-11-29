@@ -266,6 +266,7 @@ const server = app.listen(PORT, () => console.log(`🚀 Server running on http:/
 // Handle WebSocket upgrades for the proxy
 server.on('upgrade', (req, socket, head) => {
   console.log(`[Upgrade] Request URL: ${req.url}`);
+  console.log(`[Upgrade] Headers:`, Object.keys(req.headers));
   
   if (req.url.startsWith('/queue-api')) {
     console.log(`[Upgrade] Processing WebSocket upgrade for queue-api`);
@@ -273,7 +274,6 @@ server.on('upgrade', (req, socket, head) => {
     // Rewrite the URL to remove /queue-api prefix
     const targetUrl = req.url.replace(/^\/queue-api/, '');
     console.log(`[Upgrade] Rewriting URL: ${req.url} -> ${targetUrl}`);
-    req.url = targetUrl;
     
     // Add API key header before proxying
     if (QUEUE_API_KEY) {
@@ -283,10 +283,24 @@ server.on('upgrade', (req, socket, head) => {
       console.error('[Upgrade] ⚠️ WARNING: No API key available!');
     }
     
-    // Use raw proxy for WebSocket upgrade
+    // Parse target URL
+    const targetParsed = new URL(QUEUE_API_URL);
+    console.log(`[Upgrade] Target host: ${targetParsed.hostname}:${targetParsed.port || 80}`);
+    console.log(`[Upgrade] Full target: ${QUEUE_API_URL}${targetUrl}`);
+    
+    // Update the request URL for the proxy
+    req.url = targetUrl;
+    
+    // Use raw proxy for WebSocket upgrade with error handling
     try {
-      console.log(`[Upgrade] Proxying to: ${QUEUE_API_URL}${req.url}`);
-      rawProxy.ws(req, socket, head);
+      rawProxy.ws(req, socket, head, (err) => {
+        if (err) {
+          console.error('[Upgrade] ❌ Proxy callback error:', err.message, err.code);
+          socket.destroy();
+        } else {
+          console.log('[Upgrade] ✅ Proxy completed successfully');
+        }
+      });
       console.log('[Upgrade] ✓ WebSocket proxy initiated');
     } catch (err) {
       console.error('[Upgrade] ❌ Failed to initiate WebSocket proxy:', err.message, err.stack);
