@@ -182,6 +182,7 @@ function applySecurityMiddleware(app) {
  */
 const getSessionConfig = (mongoUrl) => {
   const MongoStore = require("connect-mongo");
+  const sameSiteSetting = process.env.COOKIE_SAMESITE || "lax"; // OAuth-friendly default
 
   return {
     secret: process.env.SESSION_SECRET || generateSecureSecret(),
@@ -199,7 +200,7 @@ const getSessionConfig = (mongoUrl) => {
       secure: process.env.NODE_ENV === "production", // HTTPS only in production
       httpOnly: true, // Prevent XSS attacks
       maxAge: 1000 * 60 * 60 * 24, // 24 hours
-      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax", // CSRF protection
+      sameSite: sameSiteSetting, // Lax for OAuth redirects; override via COOKIE_SAMESITE if needed
       domain: process.env.COOKIE_DOMAIN || undefined,
     },
     proxy: process.env.NODE_ENV === "production", // Trust proxy in production
