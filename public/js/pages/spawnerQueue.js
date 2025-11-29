@@ -957,8 +957,9 @@ function initializeSocket() {
   const queueApiUrl = window.queueContext.queueApiUrl || 'http://localhost:4310';
   console.log('📡 Connecting to Queue API at:', queueApiUrl);
   
+  // Force polling transport for HTTP connections to avoid wss:// upgrade issues
   socket = io(queueApiUrl, {
-    transports: ['websocket', 'polling'],
+    transports: ['polling'],
     reconnectionDelay: 1000,
     reconnectionDelayMax: 5000,
     reconnectionAttempts: Infinity
