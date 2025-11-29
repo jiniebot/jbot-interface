@@ -125,13 +125,25 @@ const queueApiProxy = createProxyMiddleware({
     }
     console.log(`[Proxy] ${req.method} ${req.url} -> ${QUEUE_API_URL}${req.url.replace('/queue-api', '')}`);
   },
+  onProxyReqWs: (proxyReq, req, socket, options, head) => {
+    // Add API key to WebSocket upgrade requests
+    if (QUEUE_API_KEY) {
+      proxyReq.setHeader('X-API-Key', QUEUE_API_KEY);
+      console.log('[Proxy] ✓ Added X-API-Key to WebSocket proxy request');
+    }
+    console.log(`[Proxy WS] Upgrading: ${req.url} -> ${QUEUE_API_URL}${req.url.replace('/queue-api', '')}`);
+  },
   onError: (err, req, res) => {
-    console.error('Queue API Proxy Error:', err.message);
+    console.error('[Proxy] HTTP Error:', err.message);
     if (res && res.writeHead) {
       res.status(502).json({ error: 'Queue API unavailable' });
     }
   },
-  logLevel: 'warn'
+  onProxyReqWsError: (err, req, socket) => {
+    console.error('[Proxy] WebSocket Error:', err.message, err.stack);
+    socket.end();
+  },
+  logLevel: 'debug'
 });
 
 // Apply authentication check for HTTP requests only
@@ -199,18 +211,28 @@ const server = app.listen(PORT, () => console.log(`🚀 Server running on http:/
 
 // Handle WebSocket upgrades for the proxy
 server.on('upgrade', (req, socket, head) => {
+  console.log(`[Upgrade] Request URL: ${req.url}, Headers:`, req.headers);
+  
   if (req.url.startsWith('/queue-api')) {
-    console.log(`[Proxy] WebSocket upgrade: ${req.url}`);
+    console.log(`[Proxy] WebSocket upgrade requested for: ${req.url}`);
     
     // Add API key header for backend authentication
     if (QUEUE_API_KEY) {
       req.headers['x-api-key'] = QUEUE_API_KEY;
-      console.log('[Proxy] Added X-API-Key header to WebSocket upgrade');
+      console.log('[Proxy] ✓ Added X-API-Key header to WebSocket upgrade');
+    } else {
+      console.log('[Proxy] ⚠️ WARNING: No API key available for WebSocket upgrade');
     }
     
-    queueApiProxy.upgrade(req, socket, head);
+    try {
+      queueApiProxy.upgrade(req, socket, head);
+      console.log('[Proxy] ✓ Upgrade handler called');
+    } catch (err) {
+      console.error('[Proxy] ❌ Upgrade failed:', err);
+      socket.destroy();
+    }
   } else {
-    // Not a queue-api request, close the socket
+    console.log(`[Upgrade] ❌ Rejected non-queue-api upgrade: ${req.url}`);
     socket.destroy();
   }
 });
