@@ -120,19 +120,26 @@ const rawProxy = httpProxy.createProxyServer({
 
 // Error handlers for the raw proxy
 rawProxy.on('error', (err, req, res) => {
-  console.error('[Raw Proxy] Error:', err.message);
+  console.error('[Raw Proxy] HTTP Error:', err.message, err.code);
   if (res && res.writeHead && !res.headersSent) {
     res.writeHead(502, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Queue API unavailable' }));
+  } else if (res && res.end) {
+    // WebSocket error - just close the socket
+    res.end();
   }
 });
 
 rawProxy.on('proxyReqWs', (proxyReq, req, socket, options, head) => {
   console.log('[Raw Proxy] WebSocket upgrade in progress');
+  console.log('[Raw Proxy] Target:', QUEUE_API_URL);
+  console.log('[Raw Proxy] Original URL:', req.url);
   // Add API key header
   if (QUEUE_API_KEY) {
     proxyReq.setHeader('X-API-Key', QUEUE_API_KEY);
     console.log('[Raw Proxy] ✓ Added X-API-Key to WebSocket request');
+  } else {
+    console.error('[Raw Proxy] ⚠️ No API key available!');
   }
 });
 
@@ -249,8 +256,14 @@ server.on('upgrade', (req, socket, head) => {
     }
     
     // Use raw proxy for WebSocket upgrade
-    rawProxy.ws(req, socket, head);
-    console.log('[Upgrade] ✓ WebSocket proxy initiated');
+    try {
+      console.log(`[Upgrade] Proxying to: ${QUEUE_API_URL}${req.url}`);
+      rawProxy.ws(req, socket, head);
+      console.log('[Upgrade] ✓ WebSocket proxy initiated');
+    } catch (err) {
+      console.error('[Upgrade] ❌ Failed to initiate WebSocket proxy:', err.message, err.stack);
+      socket.destroy();
+    }
   } else {
     console.log(`[Upgrade] ❌ Rejected non-queue-api upgrade: ${req.url}`);
     socket.destroy();
