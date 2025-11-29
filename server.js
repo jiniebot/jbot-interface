@@ -109,12 +109,38 @@ app.use("/tiles", express.static(path.join(__dirname, "public/js/map/tiles")));
 // This ensures all requests are validated and adds API key authentication
 const QUEUE_API_URL = process.env.QUEUE_API_URL || 'http://localhost:4310';
 const QUEUE_API_KEY = process.env.DASHBOARD_API_KEY || process.env.API_KEY;
+const httpProxy = require('http-proxy');
 
-// Create the proxy middleware
+// Create raw HTTP proxy for manual WebSocket handling
+const rawProxy = httpProxy.createProxyServer({
+  target: QUEUE_API_URL,
+  ws: true,
+  changeOrigin: true
+});
+
+// Error handlers for the raw proxy
+rawProxy.on('error', (err, req, res) => {
+  console.error('[Raw Proxy] Error:', err.message);
+  if (res && res.writeHead && !res.headersSent) {
+    res.writeHead(502, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Queue API unavailable' }));
+  }
+});
+
+rawProxy.on('proxyReqWs', (proxyReq, req, socket, options, head) => {
+  console.log('[Raw Proxy] WebSocket upgrade in progress');
+  // Add API key header
+  if (QUEUE_API_KEY) {
+    proxyReq.setHeader('X-API-Key', QUEUE_API_KEY);
+    console.log('[Raw Proxy] ✓ Added X-API-Key to WebSocket request');
+  }
+});
+
+// Create the proxy middleware for HTTP requests
 const queueApiProxy = createProxyMiddleware({
   target: QUEUE_API_URL,
   changeOrigin: true,
-  ws: true, // Enable WebSocket proxying
+  ws: false, // We'll handle WebSocket separately
   pathRewrite: {
     '^/queue-api': '' // Remove /queue-api prefix when forwarding
   },
@@ -125,25 +151,13 @@ const queueApiProxy = createProxyMiddleware({
     }
     console.log(`[Proxy] ${req.method} ${req.url} -> ${QUEUE_API_URL}${req.url.replace('/queue-api', '')}`);
   },
-  onProxyReqWs: (proxyReq, req, socket, options, head) => {
-    // Add API key to WebSocket upgrade requests
-    if (QUEUE_API_KEY) {
-      proxyReq.setHeader('X-API-Key', QUEUE_API_KEY);
-      console.log('[Proxy] ✓ Added X-API-Key to WebSocket proxy request');
-    }
-    console.log(`[Proxy WS] Upgrading: ${req.url} -> ${QUEUE_API_URL}${req.url.replace('/queue-api', '')}`);
-  },
   onError: (err, req, res) => {
     console.error('[Proxy] HTTP Error:', err.message);
     if (res && res.writeHead) {
       res.status(502).json({ error: 'Queue API unavailable' });
     }
   },
-  onProxyReqWsError: (err, req, socket) => {
-    console.error('[Proxy] WebSocket Error:', err.message, err.stack);
-    socket.end();
-  },
-  logLevel: 'debug'
+  logLevel: 'warn'
 });
 
 // Apply authentication check for HTTP requests only
@@ -151,6 +165,11 @@ const queueApiProxy = createProxyMiddleware({
 app.use('/queue-api', (req, res, next) => {
   // Skip auth check for WebSocket upgrade requests (socket.io handles auth via cookies)
   if (req.headers.upgrade === 'websocket') {
+    console.log('[Middleware] WebSocket upgrade detected, adding API key');
+    // Add API key for backend authentication
+    if (QUEUE_API_KEY) {
+      req.headers['x-api-key'] = QUEUE_API_KEY;
+    }
     return next();
   }
   
@@ -211,26 +230,27 @@ const server = app.listen(PORT, () => console.log(`🚀 Server running on http:/
 
 // Handle WebSocket upgrades for the proxy
 server.on('upgrade', (req, socket, head) => {
-  console.log(`[Upgrade] Request URL: ${req.url}, Headers:`, req.headers);
+  console.log(`[Upgrade] Request URL: ${req.url}`);
   
   if (req.url.startsWith('/queue-api')) {
-    console.log(`[Proxy] WebSocket upgrade requested for: ${req.url}`);
+    console.log(`[Upgrade] Processing WebSocket upgrade for queue-api`);
     
-    // Add API key header for backend authentication
+    // Rewrite the URL to remove /queue-api prefix
+    const targetUrl = req.url.replace(/^\/queue-api/, '');
+    console.log(`[Upgrade] Rewriting URL: ${req.url} -> ${targetUrl}`);
+    req.url = targetUrl;
+    
+    // Add API key header before proxying
     if (QUEUE_API_KEY) {
       req.headers['x-api-key'] = QUEUE_API_KEY;
-      console.log('[Proxy] ✓ Added X-API-Key header to WebSocket upgrade');
+      console.log('[Upgrade] ✓ Added X-API-Key header');
     } else {
-      console.log('[Proxy] ⚠️ WARNING: No API key available for WebSocket upgrade');
+      console.error('[Upgrade] ⚠️ WARNING: No API key available!');
     }
     
-    try {
-      queueApiProxy.upgrade(req, socket, head);
-      console.log('[Proxy] ✓ Upgrade handler called');
-    } catch (err) {
-      console.error('[Proxy] ❌ Upgrade failed:', err);
-      socket.destroy();
-    }
+    // Use raw proxy for WebSocket upgrade
+    rawProxy.ws(req, socket, head);
+    console.log('[Upgrade] ✓ WebSocket proxy initiated');
   } else {
     console.log(`[Upgrade] ❌ Rejected non-queue-api upgrade: ${req.url}`);
     socket.destroy();
