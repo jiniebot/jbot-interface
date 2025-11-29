@@ -118,15 +118,30 @@ const rawProxy = httpProxy.createProxyServer({
   changeOrigin: true
 });
 
+console.log(`🔗 Queue API Proxy initialized with target: ${QUEUE_API_URL}`);
+console.log(`🔑 API Key configured: ${QUEUE_API_KEY ? '✓ Yes' : '✗ No'}`);
+
 // Error handlers for the raw proxy
 rawProxy.on('error', (err, req, res) => {
-  console.error('[Raw Proxy] HTTP Error:', err.message, err.code);
+  console.error('[Raw Proxy] Connection Error:', {
+    message: err.message,
+    code: err.code,
+    address: err.address,
+    port: err.port,
+    syscall: err.syscall
+  });
+  
   if (res && res.writeHead && !res.headersSent) {
     res.writeHead(502, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Queue API unavailable' }));
   } else if (res && res.end) {
     // WebSocket error - just close the socket
+    console.error('[Raw Proxy] WebSocket connection failed, closing socket');
     res.end();
+  } else if (res && res.destroy) {
+    // Socket object
+    console.error('[Raw Proxy] WebSocket socket error, destroying connection');
+    res.destroy();
   }
 });
 
