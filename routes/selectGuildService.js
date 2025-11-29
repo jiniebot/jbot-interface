@@ -9,15 +9,24 @@ router.get("/", async (req, res) => {
 
   if (req.user.availableGuilds.length === 1) {
     const selectedGuild = req.user.availableGuilds[0];
+    const activeServices = (selectedGuild.services || []).filter((service) => {
+      const status = String(
+        service.subscriptionStatus ||
+        service.ServerInfo?.subscriptionStatus ||
+        ''
+      ).toLowerCase();
+      return status !== 'inactive';
+    });
+
     req.session.guildId = selectedGuild.guildId;
 
-    if (selectedGuild.services.length === 1) {
-      req.session.serviceId = selectedGuild.services[0].serviceId;
+    if (activeServices.length === 1) {
+      req.session.serviceId = activeServices[0].serviceId;
       return req.session.save(() => res.redirect("/dashboard"));
     }
 
     const showBackButton = req.user.availableGuilds.length > 1;
-    return req.session.save(() => res.render("selectService", { guild: selectedGuild, showBackButton }));
+    return req.session.save(() => res.render("selectService", { guild: { ...selectedGuild, services: activeServices }, showBackButton }));
   }
 
   // Fetch all user guilds from Discord API using their OAuth token
@@ -83,13 +92,22 @@ router.post("/guild", (req, res) => {
 
   req.session.guildId = selectedGuild.guildId;
 
-  if (selectedGuild.services.length === 1) {
-    req.session.serviceId = selectedGuild.services[0].serviceId;
+  const activeServices = (selectedGuild.services || []).filter((service) => {
+    const status = String(
+      service.subscriptionStatus ||
+      service.ServerInfo?.subscriptionStatus ||
+      ''
+    ).toLowerCase();
+    return status !== 'inactive';
+  });
+
+  if (activeServices.length === 1) {
+    req.session.serviceId = activeServices[0].serviceId;
     return req.session.save(() => res.json({ redirect: "/dashboard" }));
   }
 
   req.session.save(() => res.json({ 
-    services: selectedGuild.services,
+    services: activeServices,
     guildName: selectedGuild.guildName 
   }));
 });

@@ -22,8 +22,8 @@
         
         <div class="services-container">
             <div class="service-cards">
-                <% guild.services.forEach(service => { 
-                    const subStatus = String(service.subscriptionStatus || '').toLowerCase();
+                <% (guild.services || []).forEach(service => { 
+                    const subStatus = String(service.subscriptionStatus || service.ServerInfo?.subscriptionStatus || '').toLowerCase();
                     if (subStatus === 'inactive') { return; }
                 %>
                     <div class="service-card" data-service-id="<%= service.serviceId %>">
