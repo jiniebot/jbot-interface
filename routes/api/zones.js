@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const MonitorZone = require('../../schemas/gameData/MonitorZone');
 const { requireAuthAndScope, validators } = require('../../config/validation');
+const cache = require('../../utils/cache');
 
 // GET /api/zones - List all zones
 router.get('/',
@@ -11,6 +12,13 @@ router.get('/',
     try {
       const { page = 1, limit = 50, type } = req.query;
       const { guildId, serviceId } = req.session;
+
+      // Check cache first
+      const cacheKey = cache.generateKey('zones:list', guildId, serviceId, page, limit, type || 'all');
+      const cachedData = cache.get(cacheKey);
+      if (cachedData) {
+        return res.json(cachedData);
+      }
 
       const query = { guildID: guildId, serviceId };
       
@@ -25,12 +33,15 @@ router.get('/',
 
       const count = await MonitorZone.countDocuments(query);
 
-      res.json({
+      const responseData = {
         zones,
         totalPages: Math.ceil(count / limit),
         currentPage: page,
         total: count
-      });
+      };
+      
+      cache.set(cacheKey, responseData, 30000); // Cache for 30 seconds
+      res.json(responseData);
     } catch (error) {
       console.error('Error fetching zones:', error);
       res.status(500).json({ error: 'Failed to fetch zones' });
@@ -103,6 +114,11 @@ router.post('/',
       });
 
       await zone.save();
+      
+      // Invalidate zones cache
+      cache.invalidate(cache.generateKey('zones:list', guildId, serviceId));
+      cache.invalidate(cache.generateKey('map:zones', guildId, serviceId));
+      
       res.status(201).json(zone);
     } catch (error) {
       console.error('Error creating zone:', error);
@@ -153,6 +169,10 @@ router.patch('/:id',
         return res.status(404).json({ error: 'Zone not found' });
       }
 
+      // Invalidate zones cache
+      cache.invalidate(cache.generateKey('zones:list', guildId, serviceId));
+      cache.invalidate(cache.generateKey('map:zones', guildId, serviceId));
+
       res.json(zone);
     } catch (error) {
       console.error('Error updating zone:', error);
@@ -182,6 +202,10 @@ router.post('/:id/toggle',
       zone.enabled = !zone.enabled;
       await zone.save();
 
+      // Invalidate zones cache
+      cache.invalidate(cache.generateKey('zones:list', guildId, serviceId));
+      cache.invalidate(cache.generateKey('map:zones', guildId, serviceId));
+
       res.json(zone);
     } catch (error) {
       console.error('Error toggling zone:', error);
@@ -208,7 +232,11 @@ router.delete('/:id',
         return res.status(404).json({ error: 'Zone not found' });
       }
 
-      res.json({ message: 'Zone deleted successfully', zone });
+      // Invalidate zones cache
+      cache.invalidate(cache.generateKey('zones:list', guildId, serviceId));
+      cache.invalidate(cache.generateKey('map:zones', guildId, serviceId));
+
+      res.json({ message: 'Zone deleted', zone });
     } catch (error) {
       console.error('Error deleting zone:', error);
       res.status(500).json({ error: 'Failed to delete zone' });

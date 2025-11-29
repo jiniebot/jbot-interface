@@ -55,6 +55,9 @@
 
         <!-- Right Controls -->
         <div class="control-group right-controls">
+            <button class="control-btn" id="toggleDrawingPanel" title="Toggle Drawing Panel">
+                <span>🖊️</span>
+            </button>
             <button class="control-btn" id="toggleRightPanel" title="Toggle Actions Panel">
                 <span>⚙️</span>
             </button>
@@ -83,9 +86,14 @@
                     <span class="filter-label">Bases</span>
                 </label>
                 <label class="filter-toggle">
-                    <input type="checkbox" id="toggleMonitorZones" checked>
-                    <span class="filter-icon">🗺️</span>
-                    <span class="filter-label">Monitor Zones</span>
+                    <input type="checkbox" id="toggleActiveZones" checked>
+                    <span class="filter-icon">🟢</span>
+                    <span class="filter-label">Active Zones</span>
+                </label>
+                <label class="filter-toggle">
+                    <input type="checkbox" id="toggleInactiveZones" checked>
+                    <span class="filter-icon">🔴</span>
+                    <span class="filter-label">Inactive Zones</span>
                 </label>
                 <label class="filter-toggle">
                     <input type="checkbox" id="toggleActiveObjs" checked>
@@ -172,12 +180,12 @@
     </div>
 
     <!-- Left Panel -->
-    <div id="left-panel" class="floating-panel">
+    <div id="left-panel" class="floating-panel collapsed">
         <div class="panel-header">
             <div class="panel-title">Information</div>
-            <div class="panel-toggle" id="leftPanelToggle">−</div>
+            <div class="panel-toggle" id="leftPanelToggle">+</div>
         </div>
-        <div class="panel-content" id="leftPanelContent">
+        <div class="panel-content hidden" id="leftPanelContent">
             <div id="selection-info">
                 <p style="text-align: center; color: #8E8E93; margin-top: 40px;">
                     Click on a map marker to view details
@@ -187,12 +195,12 @@
     </div>
 
     <!-- Right Panel -->
-    <div id="right-panel" class="floating-panel">
+    <div id="right-panel" class="floating-panel collapsed">
         <div class="panel-header">
             <div class="panel-title">Actions</div>
-            <div class="panel-toggle" id="rightPanelToggle">−</div>
+            <div class="panel-toggle" id="rightPanelToggle">+</div>
         </div>
-        <div class="panel-content" id="rightPanelContent">
+        <div class="panel-content hidden" id="rightPanelContent">
             <div id="action-buttons">
                 <p style="text-align: center; color: #8E8E93; margin-top: 40px;">
                     Select an item to see available actions
@@ -210,30 +218,38 @@
 
     <!-- Bottom Toolbar -->
     <div id="bottom-toolbar">
-        <a href="/dashboard" class="toolbar-item active">
-            <div class="toolbar-icon">🗺️</div>
-            <div class="toolbar-label">Map</div>
+        <a href="/quests" class="toolbar-item">
+            <div class="toolbar-icon">📜</div>
+            <div class="toolbar-label">Quests</div>
+        </a>
+        <a href="/factions" class="toolbar-item">
+            <div class="toolbar-icon">⚔️</div>
+            <div class="toolbar-label">Factions</div>
         </a>
         <a href="/dashboard/store" class="toolbar-item">
             <div class="toolbar-icon">🛒</div>
             <div class="toolbar-label">Store</div>
         </a>
-        <a href="/quests" class="toolbar-item">
-            <div class="toolbar-icon">📜</div>
-            <div class="toolbar-label">Quests</div>
-        </a>
-        <a href="/logs" class="toolbar-item">
-            <div class="toolbar-icon">📋</div>
-            <div class="toolbar-label">Logs</div>
+        <a href="/dashboard" class="toolbar-item active">
+            <div class="toolbar-icon">🗺️</div>
+            <div class="toolbar-label">Map</div>
         </a>
         <a href="/spawner-queue" class="toolbar-item">
             <div class="toolbar-icon">🔄</div>
             <div class="toolbar-label">Queue</div>
         </a>
+        <a href="/logs" class="toolbar-item">
+            <div class="toolbar-icon">📋</div>
+            <div class="toolbar-label">Logs</div>
+        </a>
+        <a href="/settings" class="toolbar-item">
+            <div class="toolbar-icon">⚙️</div>
+            <div class="toolbar-label">Settings</div>
+        </a>
     </div>
 
     <!-- Dashboard JavaScript -->
-    <script type="module" src="/js/dashboardMain.js"></script>
+    <script type="module" src="/js/dashboardMain.js?v=<%= Date.now() %>"></script>
     <script>
         // Side-specific close helpers: ensure only one UI element per side is open
         function closeLeftSidePanels() {
@@ -366,6 +382,13 @@
 
         document.getElementById('toggleRightPanel')?.addEventListener('click', () => {
             togglePanel('right');
+        });
+
+        document.getElementById('toggleDrawingPanel')?.addEventListener('click', () => {
+            const drawingPanel = document.getElementById('zone-draw-controls');
+            if (drawingPanel) {
+                drawingPanel.classList.toggle('collapsed');
+            }
         });
 
         document.getElementById('zoomIn')?.addEventListener('click', () => {

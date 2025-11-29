@@ -34,8 +34,8 @@ app.use(securityLogger);
 // Build mongoose connection options with sensible defaults and env-based overrides
 const mongooseOptions = {
   // modern parser and topology engine
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+  //useNewUrlParser: true,
+  // useUnifiedTopology: true,
 };
 
 // TLS/SSL behavior can be controlled via environment variables.
@@ -84,6 +84,7 @@ app.use("/auth", authLimiter, require("./routes/auth")); // Apply strict rate li
 app.use("/selectGuildService", require("./routes/selectGuildService"));
 app.use("/dashboard", require("./routes/dashboard"));
 app.use("/settings", require("./routes/settings"));
+app.use("/spawner-queue", require("./routes/queueManager"));
 
 app.use((req, res, next) => {
   //console.log("🛠️ Current Session Data:", req.session);
@@ -113,6 +114,7 @@ app.use("/api/raids", require("./routes/api/raids"));
 app.use("/api/quests", require("./routes/api/quests"));
 app.use("/api/shop", require("./routes/api/shop"));
 app.use("/api/spawner-queue", require("./routes/api/spawner-queue"));
+app.use("/api/queue-manager", require("./routes/api/queueManager"));
 app.use("/api/logs", require("./routes/api/logs"));
 app.use("/api", require("./routes/api")); // Legacy routes
 
@@ -132,7 +134,7 @@ app.get("/debug-globals", async (req, res) => {
   try {
     const Globals = require("./schemas/globals/Globals");
     const allGlobals = await Globals.find({}).lean();
-    
+
     res.json({
       count: allGlobals.length,
       globals: allGlobals,

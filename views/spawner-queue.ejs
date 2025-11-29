@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Queue Manager - JinieBot</title>
+
+    <link rel="stylesheet" href="/css/dashboard-ios.css">
+    <link rel="stylesheet" href="/css/queue.css">
+    <link rel="stylesheet" href="/css/responsive-base.css">
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="page-loading-overlay" class="loading-overlay hidden">
+        <div class="loading-content">
+            <div class="ios-spinner"></div>
+            <div class="loading-text">Syncing queue...</div>
+        </div>
+    </div>
+
+    <!-- Top Control Bar -->
+    <div id="top-controls">
+        <div class="control-group left-controls">
+            <button class="control-btn" id="backToDashboard" title="Back to Dashboard">
+                <span>←</span>
+            </button>
+            <button class="control-btn" id="toggleStatsBtn" title="Toggle Restart Stats">
+                <span>ℹ️</span>
+            </button>
+            <button class="control-btn" id="refreshBtn" title="Refresh">
+                <span>🔄</span>
+            </button>
+        </div>
+
+        <div class="control-group center-controls">
+            <h1 class="page-title">Queue Manager</h1>
+        </div>
+
+        <div class="control-group right-controls">
+            <button class="control-btn" id="toggleUploadBtn" title="Toggle Upload Panel">
+                <span>⬆️</span>
+            </button>
+            <button class="control-btn" id="processNowBtn" title="Process Queue Now">
+                <span>⚡</span>
+            </button>
+            <button class="control-btn menu-button" id="menuButton" title="Menu">
+                <span>⋯</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Global Menu Dropdown -->
+    <div id="global-menu">
+        <div class="menu-dropdown" id="menuDropdown">
+            <a href="/dashboard" class="menu-item">
+                <div class="menu-item-icon">🗺️</div>
+                <div class="menu-item-text">Dashboard</div>
+            </a>
+            <a href="/dashboard/store" class="menu-item">
+                <div class="menu-item-icon">🛒</div>
+                <div class="menu-item-text">Store Management</div>
+            </a>
+            <a href="/spawner-queue" class="menu-item active">
+                <div class="menu-item-icon">🔄</div>
+                <div class="menu-item-text">Queue Manager</div>
+            </a>
+            <div class="menu-divider"></div>
+            <a href="/selectGuildService" class="menu-item">
+                <div class="menu-item-icon">🔄</div>
+                <div class="menu-item-text">Change Service</div>
+            </a>
+            <a href="/auth/logout" class="menu-item">
+                <div class="menu-item-icon">🚪</div>
+                <div class="menu-item-text">Logout</div>
+            </a>
+        </div>
+    </div>
+
+    <div id="side-panels">
+        <div id="statsPanel" class="floating-panel side-panel left">
+            <div class="panel-header">
+                <div class="panel-title">Restart Window</div>
+                <div class="panel-actions">
+                    <div class="badge subtle" id="serverNameBadge">Loading...</div>
+                    <button class="panel-toggle" id="statsToggle">−</button>
+                </div>
+            </div>
+            <div class="stats-grid" id="statsContent">
+                <div class="stat-chip">
+                    <div class="stat-label">Next Restart</div>
+                    <div class="stat-value" id="nextRestartValue">—</div>
+                    <div class="stat-sub" id="nextRestartExact">Predicting...</div>
+                </div>
+                <div class="stat-chip">
+                    <div class="stat-label">Pre-Queue</div>
+                    <div class="stat-value" id="preQueueValue">—</div>
+                    <div class="stat-sub" id="preQueueExact">Waiting...</div>
+                </div>
+                <div class="stat-chip">
+                    <div class="stat-label">Last Restart</div>
+                    <div class="stat-value" id="lastRestartValue">—</div>
+                    <div class="stat-sub" id="lastRestartExact">—</div>
+                </div>
+                <div class="stat-chip">
+                    <div class="stat-label">Queue Runtime</div>
+                    <div class="stat-value" id="queueLastValue">—</div>
+                    <div class="stat-sub" id="queueLastExact">Awaiting stats</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="uploadPanel" class="floating-panel side-panel right hidden">
+            <div class="panel-header">
+                <div class="panel-title">Upload & Queue</div>
+                <div class="panel-actions">
+                    <select id="uploadActionSelect" class="ios-input compact">
+                        <option value="add">Object Spawner JSON</option>
+                        <option value="add-pra">PRA JSON</option>
+                        <option value="add-spawngear">Spawn Gear Preset JSON</option>
+                    </select>
+                </div>
+            </div>
+            <div class="upload-body">
+                <label class="form-label">Choose JSON file</label>
+                <input id="jsonFileInput" type="file" accept=".json" class="ios-file">
+
+                <button class="ios-button primary full-width" id="uploadJsonBtn">
+                    Upload & Queue
+                </button>
+                <div id="uploadStatus" class="helper-text muted"></div>
+            </div>
+        </div>
+    </div>
+
+    <main id="queue-container">
+        <section class="panel-grid">
+            <div class="floating-panel section-panel">
+                <div class="panel-header">
+                    <div class="panel-title">Add Object Spawners from Custom Folder</div>
+                    <div class="panel-actions">
+                        <input id="searchSpawnerAdd" class="ios-input search-input" type="search" placeholder="Filter...">
+                    </div>
+                </div>
+                <div class="scroll-body" id="remoteNotInCfg"></div>
+            </div>
+            <div class="floating-panel section-panel">
+                <div class="panel-header">
+                    <div class="panel-title">Add PRAs from PRA Folder</div>
+                    <div class="panel-actions">
+                        <input id="searchPraAdd" class="ios-input search-input" type="search" placeholder="Filter...">
+                    </div>
+                </div>
+                <div class="scroll-body" id="praRemoteNotInCfg"></div>
+            </div>
+            <div class="floating-panel section-panel">
+                <div class="panel-header">
+                    <div class="panel-title">Add Spawn Gear from Custom Folder</div>
+                    <div class="panel-actions">
+                        <input id="searchSpawnAdd" class="ios-input search-input" type="search" placeholder="Filter...">
+                    </div>
+                </div>
+                <div class="scroll-body" id="spawnRemoteNotInCfg"></div>
+            </div>
+        </section>
+
+        <section class="panel-grid">
+            <div class="floating-panel section-panel">
+                <div class="panel-header">
+                    <div class="panel-title">Remove Object Spawners</div>
+                    <div class="panel-actions">
+                        <input id="searchSpawnerRemove" class="ios-input search-input" type="search" placeholder="Filter...">
+                    </div>
+                </div>
+                <div class="scroll-body" id="cfgNotOnRemote"></div>
+            </div>
+            <div class="floating-panel section-panel">
+                <div class="panel-header">
+                    <div class="panel-title">Remove PRA</div>
+                    <div class="panel-actions">
+                        <input id="searchPraRemove" class="ios-input search-input" type="search" placeholder="Filter...">
+                    </div>
+                </div>
+                <div class="scroll-body" id="praCfgList"></div>
+            </div>
+            <div class="floating-panel section-panel">
+                <div class="panel-header">
+                    <div class="panel-title">Remove Spawn Gear</div>
+                    <div class="panel-actions">
+                        <input id="searchSpawnRemove" class="ios-input search-input" type="search" placeholder="Filter...">
+                    </div>
+                </div>
+                <div class="scroll-body" id="spawnCfgList"></div>
+            </div>
+        </section>
+
+        <section class="floating-panel queue-panel">
+            <div class="panel-header">
+                <div class="panel-title">Queued Actions</div>
+                <div class="panel-actions">
+                    <button class="ios-button ghost" id="clearQueueBtn">Clear</button>
+                    <button class="ios-button primary" id="processQueueBtn">Process</button>
+                </div>
+            </div>
+            <div id="processingIndicator" class="processing-indicator" style="display: none;">
+                <div class="processing-spinner"></div>
+                <span>Backend is processing queue...</span>
+            </div>
+            <div id="queueList" class="queue-list"></div>
+            <div id="queueEmpty" class="empty-state" style="display: none;">
+                <div class="empty-state-icon">Queue Empty</div>
+                <h2>No queued changes</h2>
+                <p>Upload a JSON file or add items from remote files.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Bottom Toolbar -->
+    <div id="bottom-toolbar">
+        <a href="/quests" class="toolbar-item">
+            <div class="toolbar-icon">📜</div>
+            <div class="toolbar-label">Quests</div>
+        </a>
+        <a href="/factions" class="toolbar-item">
+            <div class="toolbar-icon">⚔️</div>
+            <div class="toolbar-label">Factions</div>
+        </a>
+        <a href="/dashboard/store" class="toolbar-item">
+            <div class="toolbar-icon">🛒</div>
+            <div class="toolbar-label">Store</div>
+        </a>
+        <a href="/dashboard" class="toolbar-item">
+            <div class="toolbar-icon">🗺️</div>
+            <div class="toolbar-label">Map</div>
+        </a>
+        <a href="/spawner-queue" class="toolbar-item active">
+            <div class="toolbar-icon">🔄</div>
+            <div class="toolbar-label">Queue</div>
+        </a>
+        <a href="/logs" class="toolbar-item">
+            <div class="toolbar-icon">📋</div>
+            <div class="toolbar-label">Logs</div>
+        </a>
+        <a href="/settings" class="toolbar-item">
+            <div class="toolbar-icon">⚙️</div>
+            <div class="toolbar-label">Settings</div>
+        </a>
+    </div>
+
+    <script>
+        window.queueContext = {
+            guildId: '<%= guildId %>',
+            serviceId: '<%= serviceId %>',
+            user: <%- JSON.stringify(user) %>
+        };
+    </script>
+    <script src="/js/vendor/socket.io.min.js"></script>
+    <script src="/js/pages/spawnerQueue.js"></script>
+</body>
+</html>

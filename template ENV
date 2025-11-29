@@ -35,3 +35,11 @@ COOKIE_DOMAIN=
 # SSL/TLS Configuration
 # Set to true in production when using HTTPS
 # SECURE_COOKIES=true
+
+# Queue Manager API
+# Base URL and optional API key for the queue manager process (separate droplet)
+QUEUE_API_BASE=http://localhost:4310
+QUEUE_API_KEY=
+
+# Queue API CFG cache (ms)
+CFG_CACHE_TTL_MS=300000

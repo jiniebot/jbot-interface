@@ -186,10 +186,27 @@ body.settings-page {
   box-shadow: 0 8px 32px var(--glass-shadow);
   padding: 14px;
   z-index: 950;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+  visibility: visible;
+}
+
+#zone-draw-controls.collapsed {
+  opacity: 0;
+  transform: translateY(10px);
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .zone-draw-header {
   margin-bottom: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.zone-draw-content {
+  display: block;
 }
 
 .zone-draw-title {
@@ -548,6 +565,15 @@ body.settings-page {
   font-family: 'D-DIN', -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
 }
 
+/* City Markers */
+.city-marker {
+  font-family: 'D-DIN', -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+}
+
+.city-marker * {
+  font-family: inherit !important;
+}
+
 /* Popup Buttons */
 .leaflet-popup-content button {
   background: var(--primary-blue);
@@ -628,7 +654,7 @@ body.settings-page {
 #rightPanelContent {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   padding: 4px;
 }
 
@@ -952,22 +978,22 @@ body.settings-page {
 /* Action Buttons (in right panel) */
 .icon-button {
   width: 100%;
-  padding: 12px 16px;
-  min-height: 48px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
   border-radius: var(--button-radius);
   background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 6px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
   color: var(--text-light);
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 600;
   text-align: left;
   /* Touch-friendly */
   touch-action: manipulation;
@@ -976,8 +1002,8 @@ body.settings-page {
 }
 
 .icon-button .icon {
-  font-size: 20px;
-  min-width: 20px;
+  font-size: 14px;
+  min-width: 14px;
 }
 
 .icon-button .label {
@@ -985,14 +1011,14 @@ body.settings-page {
 }
 
 .icon-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35);
-  border-color: rgba(255,255,255,0.32);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+  border-color: rgba(255,255,255,0.2);
 }
 
 .icon-button:active {
   transform: translateY(0);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 /* Touch-specific behavior for icon buttons */
@@ -1305,26 +1331,30 @@ select.customize-select { position: absolute !important; left: -9999px !importan
 .toolbar-label {
   font-size: 10px;
 }
+
+  .loading-overlay {
+    bottom: 90px;
+  }
+  
+  .loading-content {
+    padding: 14px 18px;
+  }
 }
 
 /* Page Loading Overlay */
 .loading-overlay {
   position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1001;
   transition: opacity 0.2s ease, visibility 0.2s ease;
+  pointer-events: none;
 }
 
 .loading-overlay.hidden {
   opacity: 0;
   visibility: hidden;
-  pointer-events: none;
 }
 
 .loading-content {
@@ -1334,9 +1364,12 @@ select.customize-select { position: absolute !important; left: -9999px !importan
   gap: 12px;
   padding: 18px 22px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
 }
 
 .loading-content .loading-text {

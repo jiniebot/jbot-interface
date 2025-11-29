@@ -122,6 +122,17 @@ router.post("/service", (req, res) => {
 
   if (!selectedService) return res.status(404).json({ error: "Service not found" });
 
+  // Check if the service is inactive
+  const status = String(
+    selectedService.subscriptionStatus ||
+    selectedService.ServerInfo?.subscriptionStatus ||
+    ''
+  ).toLowerCase();
+  
+  if (status === 'inactive') {
+    return res.status(403).json({ error: "Service is inactive" });
+  }
+
   req.session.serviceId = selectedService.serviceId;
   // If this request came from JS (fetch), return JSON with redirect URL so the client can navigate
   return req.session.save(() => {

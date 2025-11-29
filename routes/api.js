@@ -10,6 +10,7 @@ const {
   requireAuthAndScope,
   sanitizeInput,
 } = require("../config/validation");
+const cache = require("../utils/cache");
 
 // Lazy-load node-fetch (ESM) for faster Discord API calls without converting this file to ESM
 let cachedFetch = null;
@@ -31,6 +32,13 @@ router.use('/store', require('./api/store'));
 router.get("/recent-players", requireAuthAndScope, async (req, res) => {
   try {
     const { guildId, serviceId } = req.session;
+
+    // Check cache first
+    const cacheKey = cache.generateKey('map:players', guildId, serviceId);
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+      return res.json(cachedData);
+    }
 
     // Find the correct guild and service
     const guild = await Globals.findOne(
@@ -111,7 +119,9 @@ router.get("/recent-players", requireAuthAndScope, async (req, res) => {
       })
     );
 
-    res.json({ recentPlayers: enrichedPlayers });
+    const responseData = { recentPlayers: enrichedPlayers };
+    cache.set(cacheKey, responseData, 20000); // Cache for 20 seconds
+    res.json(responseData);
   } catch (err) {
     console.error("❌ Error fetching RecentPlayers:", err);
     res.status(500).json({ error: "Internal server error" });
@@ -121,12 +131,23 @@ router.get("/recent-players", requireAuthAndScope, async (req, res) => {
 // 🟢 Fetch Bases (Scoped by Guild & Service)
 router.get("/bases", requireAuthAndScope, async (req, res) => {
   try {
+    const { guildId, serviceId } = req.session;
+
+    // Check cache first
+    const cacheKey = cache.generateKey('map:bases', guildId, serviceId);
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+      return res.json(cachedData);
+    }
+
     const bases = await BaseProfile.find({
-      guildID: req.session.guildId,
-      serviceId: req.session.serviceId,
+      guildID: guildId,
+      serviceId: serviceId,
     });
 
-    res.json({ bases });
+    const responseData = { bases };
+    cache.set(cacheKey, responseData, 30000); // Cache for 30 seconds
+    res.json(responseData);
   } catch (err) {
     console.error("❌ Error fetching bases:", err);
     res.status(500).json({ error: "Internal server error" });
@@ -136,15 +157,26 @@ router.get("/bases", requireAuthAndScope, async (req, res) => {
 // 🟢 Fetch Active Object Spawners (Scoped by Guild & Service)
 router.get("/spawners", requireAuthAndScope, async (req, res) => {
   try {
+    const { guildId, serviceId } = req.session;
+
+    // Check cache first
+    const cacheKey = cache.generateKey('map:spawners', guildId, serviceId);
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+      return res.json(cachedData);
+    }
+
     const spawners = await ActiveObjSp.find({
       isActive: true,
-      guildID: req.session.guildId,
-      serviceId: req.session.serviceId,
+      guildID: guildId,
+      serviceId: serviceId,
     });
 
     //console.log("Fetched spawners:", spawners); // Debugging line
 
-    res.json({ spawners });
+    const responseData = { spawners };
+    cache.set(cacheKey, responseData, 30000); // Cache for 30 seconds
+    res.json(responseData);
   } catch (err) {
     console.error("❌ Error fetching spawners:", err);
     res.status(500).json({ error: "Internal Server Error" });
@@ -156,12 +188,21 @@ router.get("/monitorZones", requireAuthAndScope, async (req, res) => {
   try {
     const { guildId, serviceId } = req.session;
 
+    // Check cache first
+    const cacheKey = cache.generateKey('map:zones', guildId, serviceId);
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+      return res.json(cachedData);
+    }
+
     const monitorZones = await MonitorZone.find({
       guildID: guildId,
       serviceId: serviceId,
     });
 
-    res.json({ monitorZones });
+    const responseData = { monitorZones };
+    cache.set(cacheKey, responseData, 30000); // Cache for 30 seconds
+    res.json(responseData);
   } catch (error) {
     console.error("❌ Error fetching MonitorZones:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -310,6 +351,9 @@ router.post("/monitorZones", requireAuthAndScope, async (req, res) => {
 
     await zone.save();
 
+    // Invalidate cache
+    cache.invalidate(cache.generateKey('map:zones', guildId, serviceId));
+
     res.status(201).json({ zone });
   } catch (error) {
     console.error("❌ Error creating MonitorZone:", error);
@@ -337,6 +381,9 @@ router.post("/monitorZones/:id/toggle", requireAuthAndScope, async (req, res) =>
     zone.isActive = !zone.isActive;
     await zone.save();
 
+    // Invalidate cache
+    cache.invalidate(cache.generateKey('map:zones', guildId, serviceId));
+
     res.json({ zone });
   } catch (error) {
     console.error("❌ Error toggling MonitorZone:", error);
@@ -358,6 +405,9 @@ router.delete("/monitorZones/:id", requireAuthAndScope, async (req, res) => {
       return res.status(404).json({ error: "Zone not found" });
     }
 
+    // Invalidate cache
+    cache.invalidate(cache.generateKey('map:zones', guildId, serviceId));
+
     res.json({ message: "Zone deleted", zone });
   } catch (error) {
     console.error("❌ Error deleting MonitorZone:", error);
@@ -375,6 +425,13 @@ router.get("/discord/channels", requireAuthAndScope, async (req, res) => {
 
     const { guildId } = req.session;
     if (!guildId) return res.status(400).json({ error: "Missing guild context" });
+
+    // Check cache first
+    const cacheKey = cache.generateKey('discord:channels', guildId);
+    const cached = cache.get(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
 
     const resp = await fetch(`https://discord.com/api/v10/guilds/${guildId}/channels`, {
       headers: { Authorization: `Bot ${token}` },
@@ -394,7 +451,9 @@ router.get("/discord/channels", requireAuthAndScope, async (req, res) => {
       parent_id: ch.parent_id || null,
     }));
 
-    res.json({ channels: normalized });
+    const responseData = { channels: normalized };
+    cache.set(cacheKey, responseData, 300000); // Cache for 5 minutes
+    res.json(responseData);
   } catch (err) {
     console.error("❌ Error fetching Discord channels:", err);
     res.status(500).json({ error: "Internal Server Error" });
@@ -408,6 +467,13 @@ router.get("/discord/roles", requireAuthAndScope, async (req, res) => {
 
     const { guildId } = req.session;
     if (!guildId) return res.status(400).json({ error: "Missing guild context" });
+
+    // Check cache first
+    const cacheKey = cache.generateKey('discord:roles', guildId);
+    const cached = cache.get(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
 
     const resp = await fetch(`https://discord.com/api/v10/guilds/${guildId}/roles`, {
       headers: { Authorization: `Bot ${token}` },
@@ -426,7 +492,9 @@ router.get("/discord/roles", requireAuthAndScope, async (req, res) => {
       position: r.position,
     }));
 
-    res.json({ roles: normalized });
+    const responseData = { roles: normalized };
+    cache.set(cacheKey, responseData, 300000); // Cache for 5 minutes
+    res.json(responseData);
   } catch (err) {
     console.error("❌ Error fetching Discord roles:", err);
     res.status(500).json({ error: "Internal Server Error" });
@@ -435,6 +503,7 @@ router.get("/discord/roles", requireAuthAndScope, async (req, res) => {
 
 router.get("/discord/users", requireAuthAndScope, async (req, res) => {
   try {
+    const { guildId, serviceId } = req.session;
     const token = getBotToken();
     if (!token) return res.status(400).json({ error: "Discord bot token not configured" });
 
@@ -449,22 +518,58 @@ router.get("/discord/users", requireAuthAndScope, async (req, res) => {
 
     const uniqueIds = [...new Set(ids)];
     const results = {};
-
-    // Discord has no bulk user lookup for bots; fetch sequentially (ids are small set from UI)
+    
+    // Check cache for each user first
+    const uncachedIds = [];
     for (const id of uniqueIds) {
-      try {
-        const resp = await fetch(`https://discord.com/api/v10/users/${id}`, {
-          headers: { Authorization: `Bot ${token}` },
-        });
-        if (!resp.ok) {
-          results[id] = { error: `HTTP ${resp.status}` };
-          continue;
-        }
-        const user = await resp.json();
-        results[id] = { id: user.id, username: user.username, global_name: user.global_name, display_name: user.display_name };
-      } catch (e) {
-        results[id] = { error: e.message || "fetch_failed" };
+      const cacheKey = cache.generateKey('discord:user', id);
+      const cached = cache.get(cacheKey);
+      if (cached) {
+        results[id] = cached;
+      } else {
+        uncachedIds.push(id);
       }
+    }
+    
+    console.log(`Discord users: ${uniqueIds.length} requested, ${Object.keys(results).length} cached, ${uncachedIds.length} to fetch`);
+
+    // Fetch uncached users in parallel with timeout
+    if (uncachedIds.length > 0) {
+      const fetchPromises = uncachedIds.map(async (id) => {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3000); // 3s timeout per user
+          
+          const resp = await fetch(`https://discord.com/api/v10/users/${id}`, {
+            headers: { Authorization: `Bot ${token}` },
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+          
+          if (!resp.ok) {
+            return { id, data: { error: `HTTP ${resp.status}` } };
+          }
+          const user = await resp.json();
+          const userData = { 
+            id: user.id, 
+            username: user.username, 
+            global_name: user.global_name, 
+            display_name: user.display_name 
+          };
+          
+          // Cache for 5 minutes
+          cache.set(cache.generateKey('discord:user', id), userData, 300000);
+          
+          return { id, data: userData };
+        } catch (e) {
+          return { id, data: { error: e.name === 'AbortError' ? 'timeout' : (e.message || 'fetch_failed') } };
+        }
+      });
+      
+      const fetchResults = await Promise.all(fetchPromises);
+      fetchResults.forEach(({ id, data }) => {
+        results[id] = data;
+      });
     }
 
     res.json({ users: results });

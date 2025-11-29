@@ -1,7 +1,45 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const FormData = require('form-data');
 const ActiveObjSp = require('../../schemas/gameData/ActiveObjSp');
 const { requireAuthAndScope, validators } = require('../../config/validation');
+const {
+  validateDayZFile,
+  sanitizeFilename,
+  MAX_FILE_SIZE
+} = require('../../config/fileValidation');
+const { addToQueue } = require('../../utils/queueHelper');
+const cache = require('../../utils/cache');
+
+// Lazy-load node-fetch (ES module) for file upload forwarding
+let cachedFetch = null;
+const fetch = (...args) => {
+  if (cachedFetch) return cachedFetch(...args);
+  return import('node-fetch').then(({ default: fn }) => {
+    cachedFetch = fn;
+    return fn(...args);
+  });
+};
+
+// Configure multer for file uploads
+const storage = multer.memoryStorage(); // Store in memory for validation
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: MAX_FILE_SIZE,
+    files: 1
+  },
+  fileFilter: (req, file, cb) => {
+    // Basic pre-validation
+    if (!file.originalname.toLowerCase().endsWith('.json')) {
+      return cb(new Error('Only .json files are allowed'), false);
+    }
+    cb(null, true);
+  }
+});
 
 // GET /api/spawner-queue - List spawner queue items
 router.get('/',
@@ -102,6 +140,10 @@ router.post('/',
       });
 
       await item.save();
+      
+      // Invalidate spawners cache
+      cache.invalidate(cache.generateKey('map:spawners', guildId, serviceId));
+      
       res.status(201).json(item);
     } catch (error) {
       console.error('Error adding to spawner queue:', error);
@@ -154,6 +196,9 @@ router.patch('/:id',
         return res.status(404).json({ error: 'Queue item not found' });
       }
 
+      // Invalidate spawners cache
+      cache.invalidate(cache.generateKey('map:spawners', guildId, serviceId));
+
       res.json(item);
     } catch (error) {
       console.error('Error updating queue item:', error);
@@ -187,6 +232,9 @@ router.post('/:id/complete',
       item.status = 'completed';
       item.spawnedAt = new Date();
       await item.save();
+
+      // Invalidate spawners cache
+      cache.invalidate(cache.generateKey('map:spawners', guildId, serviceId));
 
       res.json(item);
     } catch (error) {
@@ -225,6 +273,10 @@ router.post('/bulk',
       }));
 
       const created = await ActiveObjSp.insertMany(queueItems);
+      
+      // Invalidate spawners cache
+      cache.invalidate(cache.generateKey('map:spawners', guildId, serviceId));
+      
       res.status(201).json({ count: created.length, items: created });
     } catch (error) {
       console.error('Error bulk adding to spawner queue:', error);
@@ -233,7 +285,7 @@ router.post('/bulk',
   }
 );
 
-// DELETE /api/spawner-queue/:id - Delete queue item
+// DELETE /api/spawner-queue/:id - Queue spawned object for removal
 router.delete('/:id',
   requireAuthAndScope,
   validators.objectId,
@@ -241,20 +293,39 @@ router.delete('/:id',
     try {
       const { guildId, serviceId } = req.session;
       
-      const item = await ActiveObjSp.findOneAndDelete({
+      // Find the spawned object
+      const item = await ActiveObjSp.findOne({
         _id: req.params.id,
         guildID: guildId,
         serviceId
       });
 
       if (!item) {
-        return res.status(404).json({ error: 'Queue item not found' });
+        return res.status(404).json({ error: 'Spawned object not found' });
       }
 
-      res.json({ message: 'Queue item deleted successfully', item });
+      const fileName = item.fileName.replace(/\.json$/i, '');
+
+      // Add to queue with "remove" action using the shared helper
+      const queueData = await addToQueue(serviceId, fileName, 'remove');
+
+      // Invalidate spawners cache
+      cache.invalidate(cache.generateKey('map:spawners', guildId, serviceId));
+
+      res.json({ 
+        message: 'Object queued for removal',
+        item: {
+          id: item._id,
+          fileName: item.fileName,
+          objectClass: item.fileName
+        },
+        queue: queueData.queue
+      });
     } catch (error) {
-      console.error('Error deleting queue item:', error);
-      res.status(500).json({ error: 'Failed to delete queue item' });
+      console.error('Error queuing object for removal:', error);
+      res.status(error.statusCode || 500).json({ 
+        error: error.message || 'Failed to queue object for removal'
+      });
     }
   }
 );
@@ -272,6 +343,9 @@ router.delete('/',
         status: 'completed'
       });
 
+      // Invalidate spawners cache
+      cache.invalidate(cache.generateKey('map:spawners', guildId, serviceId));
+
       res.json({ 
         message: `${result.deletedCount} completed items cleared`,
         count: result.deletedCount 
@@ -282,5 +356,223 @@ router.delete('/',
     }
   }
 );
+
+// POST /api/spawner-queue/upload - Upload and validate DayZ JSON file
+router.post('/upload',
+  requireAuthAndScope,
+  upload.single('file'),
+  async (req, res) => {
+    try {
+      const { serviceId } = req.session;
+      const { fileType } = req.body; // 'pra', 'spawngear', or 'spawner'
+
+      if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+      }
+
+      // Parse JSON from buffer for validation
+      let jsonData;
+      try {
+        jsonData = JSON.parse(req.file.buffer.toString('utf8'));
+      } catch (parseError) {
+        return res.status(400).json({ 
+          error: 'Invalid JSON file',
+          details: 'File could not be parsed as valid JSON'
+        });
+      }
+
+      // Validate the file locally first
+      const validation = validateDayZFile(req.file, jsonData, fileType);
+      if (!validation.valid) {
+        return res.status(400).json({ 
+          error: 'File validation failed',
+          details: validation.error
+        });
+      }
+
+      // Forward the upload to the queue API server via multipart
+      const queueApiUrl = process.env.QUEUE_API_BASE || 
+                          process.env.DASHBOARD_API_BASE || 
+                          `http://localhost:${process.env.DASHBOARD_API_PORT || 4310}`;
+      const apiKey = process.env.QUEUE_API_KEY || 
+                     process.env.DASHBOARD_API_KEY || 
+                     process.env.API_KEY;
+
+      // Create form data for multipart upload
+      const formData = new FormData();
+      formData.append('file', req.file.buffer, {
+        filename: req.file.originalname,
+        contentType: 'application/json'
+      });
+      formData.append('fileType', validation.type);
+
+      // Forward to queue API server
+      const uploadResponse = await fetch(
+        `${queueApiUrl}/services/${serviceId}/upload`,
+        {
+          method: 'POST',
+          headers: {
+            ...(apiKey ? { 'X-API-Key': apiKey } : {}),
+            ...formData.getHeaders()
+          },
+          body: formData
+        }
+      );
+
+      const uploadResult = await uploadResponse.json();
+
+      if (!uploadResponse.ok) {
+        return res.status(uploadResponse.status).json(uploadResult);
+      }
+
+      console.log(`File uploaded to backend for service ${serviceId}: ${uploadResult.file?.savedName}`);
+
+      // Return success with file info
+      res.status(201).json(uploadResult);
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      
+      if (error.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ 
+          error: 'File too large',
+          details: `Maximum file size is ${MAX_FILE_SIZE / 1024 / 1024}MB`
+        });
+      }
+      
+      res.status(500).json({ error: 'Failed to upload file', details: error.message });
+    }
+  }
+);
+
+// GET /api/spawner-queue/files - List uploaded files
+router.get('/files',
+  requireAuthAndScope,
+  async (req, res) => {
+    try {
+      const { serviceId } = req.session;
+      const { type } = req.query; // Filter by type: 'pra', 'spawngear', 'spawner'
+
+      const baseDir = path.join(__dirname, '../../obj_spawner_files', serviceId.toString());
+      const files = [];
+
+      // Helper function to read directory
+      const readDirSafe = (dir) => {
+        if (!fs.existsSync(dir)) return [];
+        return fs.readdirSync(dir)
+          .filter(f => f.endsWith('.json'))
+          .map(f => {
+            const filePath = path.join(dir, f);
+            const stats = fs.statSync(filePath);
+            return {
+              name: f,
+              path: path.relative(baseDir, filePath),
+              size: stats.size,
+              modified: stats.mtime
+            };
+          });
+      };
+
+      // Read files based on type filter
+      if (!type || type === 'pra') {
+        const praDir = path.join(baseDir, 'pra');
+        files.push(...readDirSafe(praDir).map(f => ({ ...f, type: 'pra' })));
+      }
+
+      if (!type || type === 'spawngear') {
+        const customDir = path.join(baseDir, 'custom');
+        const customFiles = readDirSafe(customDir)
+          .filter(f => f.name.startsWith('JinieBotLoadout_'))
+          .map(f => ({ ...f, type: 'spawngear' }));
+        files.push(...customFiles);
+      }
+
+      if (!type || type === 'spawner') {
+        const customDir = path.join(baseDir, 'custom');
+        const customFiles = readDirSafe(customDir)
+          .filter(f => !f.name.startsWith('JinieBotLoadout_'))
+          .map(f => ({ ...f, type: 'spawner' }));
+        files.push(...customFiles);
+      }
+
+      res.json({ files, count: files.length });
+    } catch (error) {
+      console.error('Error listing files:', error);
+      res.status(500).json({ error: 'Failed to list files' });
+    }
+  }
+);
+
+// DELETE /api/spawner-queue/files/:filename - Delete uploaded file
+router.delete('/files/:filename',
+  requireAuthAndScope,
+  async (req, res) => {
+    try {
+      const { serviceId } = req.session;
+      const { filename } = req.params;
+
+      // Validate filename
+      if (!filename.endsWith('.json') || filename.includes('..') || filename.includes('/')) {
+        return res.status(400).json({ error: 'Invalid filename' });
+      }
+
+      const baseDir = path.join(__dirname, '../../obj_spawner_files', serviceId.toString());
+      
+      // Check in multiple possible locations
+      const possiblePaths = [
+        path.join(baseDir, 'pra', filename),
+        path.join(baseDir, 'custom', filename),
+        path.join(baseDir, filename)
+      ];
+
+      let deletedPath = null;
+      for (const filePath of possiblePaths) {
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+          deletedPath = filePath;
+          break;
+        }
+      }
+
+      if (!deletedPath) {
+        return res.status(404).json({ error: 'File not found' });
+      }
+
+      res.json({ 
+        message: 'File deleted successfully',
+        filename
+      });
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      res.status(500).json({ error: 'Failed to delete file' });
+    }
+  }
+);
+
+/**
+ * Extract metadata from file based on type
+ */
+function getFileMetadata(data, type) {
+  const metadata = {};
+
+  if (type === 'pra') {
+    metadata.areaName = data.areaName;
+    metadata.praBoxCount = data.PRABoxes?.length || 0;
+    metadata.praPolygonCount = data.PRAPolygons?.length || 0;
+    metadata.safePositionCount = data.safePositions3D?.length || 0;
+  } else if (type === 'spawngear') {
+    metadata.name = data.name || 'Unnamed';
+    metadata.spawnWeight = data.spawnWeight;
+    metadata.hasAttachmentSlots = Array.isArray(data.attachmentSlotItemSets) && data.attachmentSlotItemSets.length > 0;
+    metadata.hasDiscreteItems = Array.isArray(data.discreteUnsortedItemSets) && data.discreteUnsortedItemSets.length > 0;
+  } else if (type === 'spawner') {
+    if (Array.isArray(data)) {
+      metadata.objectCount = data.length;
+    } else {
+      metadata.objectCount = Object.keys(data).length;
+    }
+  }
+
+  return metadata;
+}
 
 module.exports = router;

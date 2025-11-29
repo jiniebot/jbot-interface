@@ -730,36 +730,6 @@ function setupDropZone(categoryElement) {
     // Reordering is handled in dragend event
   });
 }
-
-// Reorder item within same category
-async function reorderItem(itemId, targetItemId, position) {
-  console.log(`Reordering item ${itemId} ${position} item ${targetItemId}`);
-  
-  try {
-    const response = await fetch(`/api/store/items/${itemId}/reorder`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ targetItemId, position })
-    });
-    
-    const data = await response.json();
-    
-    if (!data.success) {
-      throw new Error(data.error || 'Failed to reorder item');
-    }
-    
-    console.log('✅ Item reordered successfully in database');
-    showSuccess('Item order updated');
-  } catch (error) {
-    console.error('❌ Error reordering item:', error);
-    showError('Failed to reorder item: ' + error.message);
-    // Reload to restore correct order
-    await loadStoreItems();
-  }
-}
-
 // Move item to different category
 async function moveItem(itemId, shopCategory, itemCategory) {
   try {

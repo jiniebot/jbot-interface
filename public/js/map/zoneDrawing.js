@@ -12,19 +12,22 @@ export function setupZoneDrawing(map, { onZoneCreated } = {}) {
 
   const controls = document.createElement("div");
   controls.id = "zone-draw-controls";
+  controls.classList.add("collapsed"); // Start collapsed
   controls.innerHTML = `
     <div class="zone-draw-header">
       <div class="zone-draw-title">Monitor Zones</div>
       <div class="zone-draw-subtitle">Draw on map to create a zone</div>
     </div>
-    <div class="zone-draw-actions">
-      <button type="button" class="zone-draw-btn" data-mode="circle">Draw Circle</button>
-      <button type="button" class="zone-draw-btn" data-mode="polygon">Draw Polygon</button>
-      <button type="button" class="zone-draw-btn ghost" data-action="finish" disabled>Finish</button>
-      <button type="button" class="zone-draw-btn ghost" data-action="cancel" disabled>Cancel</button>
+    <div class="zone-draw-content">
+      <div class="zone-draw-actions">
+        <button type="button" class="zone-draw-btn" data-mode="circle">Draw Circle</button>
+        <button type="button" class="zone-draw-btn" data-mode="polygon">Draw Polygon</button>
+        <button type="button" class="zone-draw-btn ghost" data-action="finish" disabled>Finish</button>
+        <button type="button" class="zone-draw-btn ghost" data-action="cancel" disabled>Cancel</button>
+      </div>
+      <div class="zone-draw-status" id="zoneDrawStatus">Choose a draw mode to begin.</div>
+      <div class="zone-meta hidden" id="zoneMetaPanel"></div>
     </div>
-    <div class="zone-draw-status" id="zoneDrawStatus">Choose a draw mode to begin.</div>
-    <div class="zone-meta hidden" id="zoneMetaPanel"></div>
   `;
   container.appendChild(controls);
 

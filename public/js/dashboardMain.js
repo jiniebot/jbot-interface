@@ -10,14 +10,16 @@ import {
   loadRecentPlayers,
   loadBases,
   loadMonitorZones,
-  loadActiveObjSps
+  loadActiveObjSps,
+  invalidateCache
 } from "./map/dataLoader.js";
 import { setupZoneDrawing } from "./map/zoneDrawing.js";
 
 // Create layer groups for all data types
 let recentPlayersLayer = L.layerGroup();
 let baseClusterGroup = L.layerGroup();
-let monitorZonesLayer = L.layerGroup();
+let activeZonesLayer = L.layerGroup();
+let inactiveZonesLayer = L.layerGroup();
 let activeObjClusterGroup = L.layerGroup();
 const loadingOverlay = document.getElementById('page-loading-overlay');
 const showOverlay = () => loadingOverlay?.classList.remove('hidden');
@@ -60,17 +62,26 @@ const hideOverlay = () => loadingOverlay?.classList.add('hidden');
   handleMapType(document, map, tileLayers, currentLayer);
 
   // Load data layers in parallel
+  const dataLoadStart = performance.now();
+  console.log('🚀 DASHBOARD: Starting parallel data load...');
+  
   await Promise.all([
     loadRecentPlayers(map, recentPlayersLayer),
     loadBases(map, baseClusterGroup),
-    loadMonitorZones(map, monitorZonesLayer),
+    loadMonitorZones(map, { activeLayer: activeZonesLayer, inactiveLayer: inactiveZonesLayer }),
     loadActiveObjSps(map, activeObjClusterGroup)
   ]);
+  
+  const dataLoadTime = (performance.now() - dataLoadStart).toFixed(2);
+  console.log(`✅ DASHBOARD: All data loaded in ${dataLoadTime}ms`);
 
   // Enable drawing new monitor zones directly on the map
   setupZoneDrawing(map, {
     onZoneCreated: async () => {
-      await loadMonitorZones(map, monitorZonesLayer);
+      // Invalidate cache when new zone is created
+      invalidateCache('/monitorZones');
+      invalidateCache('/zones');
+      await loadMonitorZones(map, { activeLayer: activeZonesLayer, inactiveLayer: inactiveZonesLayer });
     },
   });
 
@@ -94,11 +105,19 @@ const hideOverlay = () => loadingOverlay?.classList.add('hidden');
     }
   });
 
-  document.getElementById('toggleMonitorZones')?.addEventListener('change', (e) => {
+  document.getElementById('toggleActiveZones')?.addEventListener('change', (e) => {
     if (e.target.checked) {
-      if (!map.hasLayer(monitorZonesLayer)) map.addLayer(monitorZonesLayer);
+      if (!map.hasLayer(activeZonesLayer)) map.addLayer(activeZonesLayer);
     } else {
-      if (map.hasLayer(monitorZonesLayer)) map.removeLayer(monitorZonesLayer);
+      if (map.hasLayer(activeZonesLayer)) map.removeLayer(activeZonesLayer);
+    }
+  });
+
+  document.getElementById('toggleInactiveZones')?.addEventListener('change', (e) => {
+    if (e.target.checked) {
+      if (!map.hasLayer(inactiveZonesLayer)) map.addLayer(inactiveZonesLayer);
+    } else {
+      if (map.hasLayer(inactiveZonesLayer)) map.removeLayer(inactiveZonesLayer);
     }
   });
 
@@ -141,6 +160,7 @@ window.deleteBase = async function(baseId) {
     });
 
     if (response.ok) {
+      invalidateCache('/bases');
       alert('Base deleted successfully');
       location.reload();
     } else {
@@ -159,6 +179,8 @@ window.toggleZone = async function(zoneId, enable) {
     });
 
     if (response.ok) {
+      invalidateCache('/monitorZones');
+      invalidateCache('/zones');
       alert(`Zone ${enable ? 'enabled' : 'disabled'} successfully`);
       location.reload();
     } else {
@@ -179,6 +201,8 @@ window.deleteZone = async function(zoneId) {
     });
 
     if (response.ok) {
+      invalidateCache('/monitorZones');
+      invalidateCache('/zones');
       alert('Zone deleted successfully');
       location.reload();
     } else {
@@ -190,22 +214,28 @@ window.deleteZone = async function(zoneId) {
 };
 
 window.queueForRemoval = async function(objId) {
-  if (!confirm('Queue this object for removal?')) return;
+  if (!confirm('Queue this object for removal on next restart?')) return;
 
   try {
     const response = await fetch(`/api/spawner-queue/${objId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'queued_removal' })
+      method: 'DELETE'
     });
 
     if (response.ok) {
-      alert('Object queued for removal');
+      const data = await response.json();
+      invalidateCache('/spawners');
+      alert(`Object queued for removal: ${data.item?.objectClass || 'Unknown'}`);
+      // Optionally reload the map data to show the updated status
+      if (typeof loadAllData === 'function') {
+        loadAllData();
+      }
     } else {
-      alert('Failed to queue object');
+      const error = await response.json();
+      alert(`Failed to queue object: ${error.error || 'Unknown error'}`);
     }
   } catch (error) {
-    console.error('Error queuing object:', error);
+    console.error('Error queuing object for removal:', error);
+    alert('Failed to queue object for removal');
   }
 };
 
@@ -218,6 +248,7 @@ window.deleteObject = async function(objId) {
     });
 
     if (response.ok) {
+      invalidateCache('/spawners');
       alert('Object deleted successfully');
       location.reload();
     } else {

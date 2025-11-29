@@ -13,6 +13,16 @@ const API_BASE = '/api';
 const RETRY_ATTEMPTS = 3;
 const RETRY_DELAY = 1000; // ms
 
+// Client-side cache configuration
+const CLIENT_CACHE = new Map();
+const CACHE_TTL = {
+  '/bases': 30000,        // 30 seconds
+  '/spawners': 30000,     // 30 seconds
+  '/monitorZones': 30000, // 30 seconds
+  '/zones': 30000,        // 30 seconds
+  '/recent-players': 20000 // 20 seconds
+};
+
 // Icon configurations
 const ICONS = {
   player: {
@@ -34,29 +44,91 @@ const ICONS = {
 // ============================================
 
 /**
- * Fetch data from API with retry logic
+ * Fetch data from API with retry logic and client-side caching
  */
-async function fetchWithRetry(endpoint, attempts = RETRY_ATTEMPTS) {
+async function fetchWithRetry(endpoint, attempts = RETRY_ATTEMPTS, bypassCache = false) {
+  const startTime = performance.now();
+  
+  // Check client-side cache first
+  if (!bypassCache) {
+    const cached = CLIENT_CACHE.get(endpoint);
+    if (cached && cached.expiry > Date.now()) {
+      const elapsed = (performance.now() - startTime).toFixed(2);
+      console.log(`🚀 CLIENT CACHE HIT: ${endpoint} (${elapsed}ms, expires in ${Math.round((cached.expiry - Date.now()) / 1000)}s)`);
+      return cached.data;
+    } else if (cached) {
+      console.log(`⏰ Client cache EXPIRED for ${endpoint}`);
+    } else {
+      console.log(`❌ Client cache MISS for ${endpoint} (not cached yet)`);
+    }
+  }
+
+  console.log(`🌐 Fetching from server: ${endpoint}`);
+  
   for (let i = 0; i < attempts; i++) {
     try {
+      const fetchStart = performance.now();
       const response = await fetch(`${API_BASE}${endpoint}`);
+      const fetchTime = (performance.now() - fetchStart).toFixed(2);
       
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
       
-      return await response.json();
+      const parseStart = performance.now();
+      const data = await response.json();
+      const parseTime = (performance.now() - parseStart).toFixed(2);
+      const totalTime = (performance.now() - startTime).toFixed(2);
+      
+      // Log timing breakdown
+      console.log(`✅ SERVER RESPONSE: ${endpoint} | Total: ${totalTime}ms (Network: ${fetchTime}ms, Parse: ${parseTime}ms) | Items: ${data.bases?.length || data.spawners?.length || data.zones?.length || data.monitorZones?.length || data.recentPlayers?.length || 'N/A'}`);
+      
+      // Cache the response with TTL
+      const ttl = CACHE_TTL[endpoint] || 30000; // Default 30s
+      CLIENT_CACHE.set(endpoint, {
+        data: data,
+        expiry: Date.now() + ttl
+      });
+      console.log(`💾 Cached ${endpoint} for ${ttl/1000}s`);
+      
+      return data;
     } catch (error) {
       console.warn(`⚠️ Attempt ${i + 1}/${attempts} failed for ${endpoint}:`, error.message);
       
       if (i === attempts - 1) {
-        console.error(`❌ Failed to fetch ${endpoint} after ${attempts} attempts`);
+        const totalTime = (performance.now() - startTime).toFixed(2);
+        console.error(`❌ Failed to fetch ${endpoint} after ${attempts} attempts (${totalTime}ms total)`);
         throw error;
       }
       
       await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * (i + 1)));
     }
   }
+}
+
+/**
+ * Invalidate client-side cache for specific endpoint or pattern
+ */
+export function invalidateCache(pattern) {
+  if (typeof pattern === 'string') {
+    // Exact match
+    CLIENT_CACHE.delete(pattern);
+  } else if (pattern instanceof RegExp) {
+    // Pattern match
+    for (const key of CLIENT_CACHE.keys()) {
+      if (pattern.test(key)) {
+        CLIENT_CACHE.delete(key);
+      }
+    }
+  }
+}
+
+/**
+ * Clear all client-side cache
+ */
+export function clearAllCache() {
+  CLIENT_CACHE.clear();
+  console.log('✅ Client cache cleared');
 }
 
 /**
@@ -78,12 +150,38 @@ function createIcon(type, customSize = null) {
  * Create a flag icon with dynamic sizing
  */
 function createFlagIcon(flagIconURL, zoom) {
-  const size = getFlagSize(zoom);
-  return L.icon({
-    iconUrl: flagIconURL,
-    iconSize: size,
-    iconAnchor: [size[0] / 2, size[1] / 2],
-    popupAnchor: [0, -size[1] / 2]
+  // Scale based on zoom level
+  // Zoomed out (zoom <= 2): 40% bigger = 7px radius (14px diameter)
+  // Zoomed in (zoom >= 4): 2x size = 10px radius (20px diameter)
+  // Linear interpolation between zoom levels 2-4
+  let radius;
+  if (zoom <= 2) {
+    radius = 7; // 40% bigger than original 5px
+  } else if (zoom >= 4) {
+    radius = 10; // 2x original 5px
+  } else {
+    // Linear interpolation between 7 and 10
+    const t = (zoom - 2) / 2; // normalize to 0-1
+    radius = 7 + (3 * t);
+  }
+  
+  const diameter = radius * 2;
+  
+  return L.divIcon({
+    className: 'base-marker',
+    html: `
+      <svg height="${diameter}" width="${diameter}" style="overflow: visible; cursor: pointer;">
+        <circle cx="${radius}" cy="${radius}" r="${radius}" style="fill: url(#flagPattern-${flagIconURL.replace(/[^a-zA-Z0-9]/g, '')}); stroke: #ffffff7d; stroke-width: 1.5;" />
+        <defs>
+          <pattern id="flagPattern-${flagIconURL.replace(/[^a-zA-Z0-9]/g, '')}" x="0" y="0" width="1" height="1">
+            <image href="${flagIconURL}" x="0" y="0" width="${diameter}" height="${diameter}" preserveAspectRatio="xMidYMid slice" />
+          </pattern>
+        </defs>
+      </svg>
+    `,
+    iconSize: [diameter, diameter],
+    iconAnchor: [radius, radius],
+    popupAnchor: [0, -radius]
   });
 }
 
@@ -91,10 +189,8 @@ function createFlagIcon(flagIconURL, zoom) {
  * Get flag size based on zoom level
  */
 function getFlagSize(zoom) {
-  if (zoom >= 6) return [30, 30];
-  if (zoom >= 5) return [35, 35];
-  if (zoom >= 4) return [40, 40];
-  return [30, 30];
+  // Match city marker size (10x10 to match the 5px radius circle)
+  return [10, 10];
 }
 
 /**
@@ -167,6 +263,8 @@ function showInRightPanel(content) {
  * Load Recent Players
  */
 export async function loadRecentPlayers(map, layerGroup) {
+  const loadStart = performance.now();
+  console.log('👥 Starting loadRecentPlayers()...');
   showLoading('Recent Players');
   
   // Store layer group globally for focus function
@@ -175,6 +273,7 @@ export async function loadRecentPlayers(map, layerGroup) {
   try {
     const data = await fetchWithRetry('/recent-players');
     const players = data.recentPlayers || [];
+    console.log(`👥 Fetched ${players.length} players`);
     
     players.forEach((player, idx) => {
       const latLng = mapDayZToLeaflet(player.lastPos[0], player.lastPos[2], map);
@@ -364,8 +463,12 @@ export async function loadRecentPlayers(map, layerGroup) {
     
     map.addLayer(layerGroup);
     hideLoading('Recent Players', players.length);
+    
+    const loadTime = (performance.now() - loadStart).toFixed(2);
+    console.log(`✅ loadRecentPlayers() completed in ${loadTime}ms (${players.length} players)`);
   } catch (error) {
-    console.error('Failed to load recent players:', error);
+    const loadTime = (performance.now() - loadStart).toFixed(2);
+    console.error(`❌ loadRecentPlayers() failed after ${loadTime}ms:`, error);
     hideLoading('Recent Players', 0);
   }
 }
@@ -374,29 +477,39 @@ export async function loadRecentPlayers(map, layerGroup) {
  * Load Bases
  */
 export async function loadBases(map, layerGroup) {
+  const loadStart = performance.now();
+  console.log('📦 Starting loadBases()...');
   showLoading('Bases');
   
   try {
     const data = await fetchWithRetry('/bases');
     const bases = data.bases || [];
+    console.log(`📦 Fetched ${bases.length} bases`);
 
     // Fetch Discord roles and users to show names instead of IDs
     let roleMap = {};
     try {
       if (cachedRoles === null) {
+        console.log('🔍 Fetching Discord roles...');
+        const roleStart = performance.now();
         const roleResp = await fetch('/api/discord/roles');
         if (roleResp.ok) {
           const roleData = await roleResp.json();
           cachedRoles = roleData.roles || [];
+          console.log(`✅ Fetched ${cachedRoles.length} Discord roles in ${(performance.now() - roleStart).toFixed(2)}ms`);
         } else {
           cachedRoles = [];
+          console.log('⚠️ Discord roles fetch failed');
         }
+      } else {
+        console.log(`💾 Using cached Discord roles (${cachedRoles.length} roles)`);
       }
       (cachedRoles || []).forEach((r) => {
         roleMap[r.id] = r.name;
       });
     } catch (e) {
       cachedRoles = [];
+      console.log('⚠️ Discord roles fetch error:', e.message);
     }
 
     let userMap = {};
@@ -405,14 +518,33 @@ export async function loadBases(map, layerGroup) {
       const uncached = ownerIds.filter((id) => !cachedUsers[id]);
       if (uncached.length) {
         try {
-          const userResp = await fetch(`/api/discord/users?id=${uncached.join(',')}`);
-          if (userResp.ok) {
-            const userData = await userResp.json();
-            Object.assign(cachedUsers, userData.users || {});
+          console.log(`🔍 Fetching ${uncached.length} Discord users (out of ${ownerIds.length} total)...`);
+          const userStart = performance.now();
+          
+          // Batch in groups of 50 to avoid overloading the API
+          const batchSize = 50;
+          for (let i = 0; i < uncached.length; i += batchSize) {
+            const batch = uncached.slice(i, i + batchSize);
+            console.log(`  → Batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(uncached.length / batchSize)}: ${batch.length} users`);
+            const batchStart = performance.now();
+            
+            const userResp = await fetch(`/api/discord/users?id=${batch.join(',')}`);
+            if (userResp.ok) {
+              const userData = await userResp.json();
+              Object.assign(cachedUsers, userData.users || {});
+              console.log(`  ✅ Batch completed in ${(performance.now() - batchStart).toFixed(2)}ms`);
+            } else {
+              console.log(`  ⚠️ Batch failed: ${userResp.status}`);
+            }
           }
+          
+          console.log(`✅ Fetched all Discord users in ${(performance.now() - userStart).toFixed(2)}ms`);
         } catch (e) {
           // ignore if not configured
+          console.log('⚠️ Discord users fetch error:', e.message);
         }
+      } else {
+        console.log(`💾 All ${ownerIds.length} Discord users already cached`);
       }
       ownerIds.forEach((id) => {
         if (cachedUsers[id]) userMap[id] = cachedUsers[id];
@@ -420,6 +552,8 @@ export async function loadBases(map, layerGroup) {
     }
     
     // Load flag icon mappings
+    console.log('🚩 Fetching flag options...');
+    const flagStart = performance.now();
     const flagResponse = await fetch('/dayzdata/flagOptions.json');
     const flagData = await flagResponse.json();
     const flagMap = {};
@@ -427,7 +561,10 @@ export async function loadBases(map, layerGroup) {
     flagData.Flag_Options.forEach((flag) => {
       flagMap[flag.value] = flag.imgpath;
     });
+    console.log(`✅ Loaded ${flagData.Flag_Options.length} flag options in ${(performance.now() - flagStart).toFixed(2)}ms`);
     
+    console.log('🏗️ Creating base markers...');
+    const markerStart = performance.now();
     bases.forEach((base) => {
       const latLng = mapDayZToLeaflet(base.flagLoc[0], base.flagLoc[2], map);
 
@@ -457,10 +594,13 @@ export async function loadBases(map, layerGroup) {
       };
       
       marker.bindPopup(`
-        <strong>${base.baseName}</strong><br>
-        Owner: ${ownerLabel}<br>
-        Faction: ${factionLabel}<br>
-        Structures: ${base.structures.length}
+        <div style="position: relative; padding-right: 40px;">
+          <img src="${flagIconURL}" style="position: absolute; top: 0; right: 0; width: 32px; height: 32px; object-fit: contain;" />
+          <strong>${base.baseName}</strong><br>
+          Owner: ${ownerLabel}<br>
+          Faction: ${factionLabel}<br>
+          Structures: ${base.structures.length}
+        </div>
       `);
       
       marker.on('click', () => {
@@ -523,6 +663,7 @@ export async function loadBases(map, layerGroup) {
       
       layerGroup.addLayer(marker);
     });
+    console.log(`✅ Created ${bases.length} base markers in ${(performance.now() - markerStart).toFixed(2)}ms`);
     
     // Store zoom handler on layerGroup to prevent duplicates
     if (!layerGroup._zoomHandlerAttached) {
@@ -539,8 +680,12 @@ export async function loadBases(map, layerGroup) {
     
     map.addLayer(layerGroup);
     hideLoading('Bases', bases.length);
+    
+    const loadTime = (performance.now() - loadStart).toFixed(2);
+    console.log(`✅ loadBases() completed in ${loadTime}ms (${bases.length} bases)`);
   } catch (error) {
-    console.error('Failed to load bases:', error);
+    const loadTime = (performance.now() - loadStart).toFixed(2);
+    console.error(`❌ loadBases() failed after ${loadTime}ms:`, error);
     hideLoading('Bases', 0);
   }
 }
@@ -554,12 +699,23 @@ let cachedRoles = null;
 let cachedUsers = {};
 
 export async function loadMonitorZones(map, layerGroup) {
+  const loadStart = performance.now();
+  console.log('🗺️ Starting loadMonitorZones()...');
   showLoading('Monitor Zones');
-  layerGroup.clearLayers();
+  
+  // Support both old (single layer) and new (active/inactive layers) format
+  const activeLayer = layerGroup.activeLayer || layerGroup;
+  const inactiveLayer = layerGroup.inactiveLayer || layerGroup;
+  
+  activeLayer.clearLayers();
+  if (inactiveLayer !== activeLayer) {
+    inactiveLayer.clearLayers();
+  }
   
   try {
     const data = await fetchWithRetry('/monitorZones');
     const zones = data.monitorZones || [];
+    console.log(`🗺️ Fetched ${zones.length} zones`);
 
     // Fetch Discord channels once for display (ignore failures silently)
     let channelMap = {};
@@ -620,34 +776,40 @@ export async function loadMonitorZones(map, layerGroup) {
         );
         
         // Use circleMarker with pixel radius (not affected by projection bounds)
+        // Style based on active status
+        const isActive = zone.isActive;
         shape = L.circleMarker(latLng, {
           radius: radiusInPixels,
           stroke: true,
-          color: "rgba(255,255,255,0.55)", // soft white stroke
+          color: isActive ? "rgba(255,255,255,0.55)" : "rgba(255, 59, 48, 0.6)", // white for active, red for inactive
           weight: 2,
-          fillColor: "rgba(120, 144, 180, 0.2)", // greyish blue fill at 20%
-          fillOpacity: 0.2,
-          opacity: 0.8,
+          dashArray: isActive ? null : "5, 5", // dotted for inactive
+          fillColor: isActive ? "rgba(120, 144, 180, 0.2)" : "transparent", // fill only if active
+          fillOpacity: isActive ? 0.2 : 0,
+          opacity: isActive ? 0.8 : 0.6,
           renderer: sharedRenderer
         });
         
         // Store zone data for zoom handler
         shape._zoneData = zone;
         
-        const applyGradient = () => {
-          const element = shape.getElement();
-          if (element) {
-            element.setAttribute("fill", "url(#zoneGradient)");
-            // Remove any clipping
-            element.removeAttribute("clip-path");
-            element.style.overflow = "visible";
-          }
-        };
-        
-        shape.on("add", applyGradient);
-        
-        // Store gradient function on shape for zoom handler
-        shape._applyGradient = applyGradient;
+        // Only apply gradient to active zones
+        if (isActive) {
+          const applyGradient = () => {
+            const element = shape.getElement();
+            if (element) {
+              element.setAttribute("fill", "url(#zoneGradient)");
+              // Remove any clipping
+              element.removeAttribute("clip-path");
+              element.style.overflow = "visible";
+            }
+          };
+          
+          shape.on("add", applyGradient);
+          
+          // Store gradient function on shape for zoom handler
+          shape._applyGradient = applyGradient;
+        }
         
       } else if (zone.zoneType === 1) {
         // Polygon zone
@@ -655,12 +817,15 @@ export async function loadMonitorZones(map, layerGroup) {
           mapDayZToLeaflet(x, y, map)
         );
         
+        // Style based on active status
+        const isActive = zone.isActive;
         shape = L.polygon(polygonCoords, {
-          color: "rgba(255,255,255,0.55)", // soft white stroke
+          color: isActive ? "rgba(255,255,255,0.55)" : "rgba(255, 59, 48, 0.6)", // white for active, red for inactive
           weight: 2,
-          fillColor: "rgba(90, 120, 100, 0.2)", // greyish green fill at 20%
-          fillOpacity: 0.2,
-          opacity: 0.8
+          dashArray: isActive ? null : "5, 5", // dotted for inactive
+          fillColor: isActive ? "rgba(90, 120, 100, 0.2)" : "transparent", // fill only if active
+          fillOpacity: isActive ? 0.2 : 0,
+          opacity: isActive ? 0.8 : 0.6
         });
       }
       
@@ -721,66 +886,90 @@ export async function loadMonitorZones(map, layerGroup) {
           showInRightPanel(rightPanelContent);
         });
         
-        layerGroup.addLayer(shape);
+        // Add to appropriate layer based on active status
+        const targetLayer = zone.isActive ? activeLayer : inactiveLayer;
+        targetLayer.addLayer(shape);
       }
     });
     
     // Attach single (debounced) handler for gradient reapplication and radius update
-    if (!layerGroup._zoomHandlerAttached) {
+    const handleZoomUpdate = () => {
       let rafId = null;
       const scheduleUpdate = () => {
         if (rafId) cancelAnimationFrame(rafId);
         rafId = requestAnimationFrame(() => {
           try {
-            layerGroup.eachLayer((shape) => {
-              // Reapply gradient
-              if (shape._applyGradient) {
-                try { shape._applyGradient(); } catch (e) { /* ignore */ }
-              }
-
-              // Update circle radius for pixel-based circles
-              if (shape._zoneData && shape._zoneData.zoneType === 0) {
-                try {
-                  const latLng = shape.getLatLng();
-                  const edgePoint = mapDayZToLeaflet(
-                    shape._zoneData.location[0] + shape._zoneData.range,
-                    shape._zoneData.location[2],
-                    map
-                  );
-
-                  const point1 = map.latLngToLayerPoint(latLng);
-                  const point2 = map.latLngToLayerPoint(edgePoint);
-
-                  if (
-                    Number.isFinite(point1.x) && Number.isFinite(point1.y) &&
-                    Number.isFinite(point2.x) && Number.isFinite(point2.y)
-                  ) {
-                    const radiusInPixels = Math.sqrt(
-                      Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2)
-                    );
-                    if (Number.isFinite(radiusInPixels) && radiusInPixels > 0) {
-                      shape.setRadius(radiusInPixels);
-                    }
-                  }
-                } catch (err) {
-                  // If calculation fails during rapid interaction, skip this shape
+            // Update shapes in both active and inactive layers
+            [activeLayer, inactiveLayer].forEach(layer => {
+              layer.eachLayer((shape) => {
+                // Reapply gradient
+                if (shape._applyGradient) {
+                  try { shape._applyGradient(); } catch (e) { /* ignore */ }
                 }
-              }
+
+                // Update circle radius for pixel-based circles
+                if (shape._zoneData && shape._zoneData.zoneType === 0) {
+                  try {
+                    const latLng = shape.getLatLng();
+                    const edgePoint = mapDayZToLeaflet(
+                      shape._zoneData.location[0] + shape._zoneData.range,
+                      shape._zoneData.location[2],
+                      map
+                    );
+
+                    const point1 = map.latLngToLayerPoint(latLng);
+                    const point2 = map.latLngToLayerPoint(edgePoint);
+
+                    if (
+                      Number.isFinite(point1.x) && Number.isFinite(point1.y) &&
+                      Number.isFinite(point2.x) && Number.isFinite(point2.y)
+                    ) {
+                      const radiusInPixels = Math.sqrt(
+                        Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2)
+                      );
+                      if (Number.isFinite(radiusInPixels) && radiusInPixels > 0) {
+                        shape.setRadius(radiusInPixels);
+                      }
+                    }
+                  } catch (err) {
+                    // If calculation fails during rapid interaction, skip this shape
+                  }
+                }
+              });
             });
           } finally {
             rafId = null;
           }
         });
       };
+      return scheduleUpdate;
+    };
 
+    if (!activeLayer._zoomHandlerAttached) {
+      const scheduleUpdate = handleZoomUpdate();
       map.on('zoomend moveend', scheduleUpdate);
-      layerGroup._zoomHandlerAttached = true;
+      activeLayer._zoomHandlerAttached = true;
+      inactiveLayer._zoomHandlerAttached = true;
     }
     
-    map.addLayer(layerGroup);
-    hideLoading('Monitor Zones', zones.length);
+    // Add both layers to map
+    map.addLayer(activeLayer);
+    if (inactiveLayer !== activeLayer) {
+      map.addLayer(inactiveLayer);
+    }
+    
+    // Count zones in each layer
+    const activeCount = activeLayer.getLayers().length;
+    const inactiveCount = inactiveLayer !== activeLayer ? inactiveLayer.getLayers().length : 0;
+    const totalCount = activeCount + inactiveCount;
+    
+    hideLoading('Monitor Zones', totalCount);
+    
+    const loadTime = (performance.now() - loadStart).toFixed(2);
+    console.log(`✅ loadMonitorZones() completed in ${loadTime}ms (${activeCount} active, ${inactiveCount} inactive, ${totalCount} total)`);
   } catch (error) {
-    console.error('Failed to load monitor zones:', error);
+    const loadTime = (performance.now() - loadStart).toFixed(2);
+    console.error(`❌ loadMonitorZones() failed after ${loadTime}ms:`, error);
     hideLoading('Monitor Zones', 0);
   }
 }
@@ -789,6 +978,8 @@ export async function loadMonitorZones(map, layerGroup) {
  * Load Active Object Spawners
  */
 export async function loadActiveObjSps(map, layerGroup) {
+  const loadStart = performance.now();
+  console.log('📦 Starting loadActiveObjSps()...');
   showLoading('Spawned Objects');
   
   try {
@@ -797,6 +988,7 @@ export async function loadActiveObjSps(map, layerGroup) {
       !obj.fileName.startsWith('Flag_') && 
       !obj.fileName.startsWith('Armband_')
     );
+    console.log(`📦 Fetched ${spawners.length} spawned objects`);
     
     spawners.forEach((obj) => {
       const latLng = mapDayZToLeaflet(obj.pos[0], obj.pos[2], map);
@@ -812,11 +1004,11 @@ export async function loadActiveObjSps(map, layerGroup) {
         Owner: ${obj.owner_userID || 'Server'}<br>
         Lifetime: ${obj.lifetime === -1 ? "Forever" : obj.lifetime}<br>
         Status: ${obj.isActive ? "Active" : "Inactive"}<br>
-        <button class="rm-btn" data-action="queue-removal" data-id="${obj.id}">Queue Removal</button>
+        <button class="rm-btn" data-action="queue-removal" data-id="${obj._id}">Queue Removal</button>
       `;
       
       popupContent.querySelector('.rm-btn').addEventListener('click', () => {
-        queueForRemoval(obj.id);
+        queueForRemoval(obj._id);
       });
       
       marker.bindPopup(popupContent);
@@ -835,15 +1027,15 @@ export async function loadActiveObjSps(map, layerGroup) {
         
         const rightPanelContent = document.createElement('div');
         rightPanelContent.innerHTML = `
-          <button class="icon-button" data-action="edit-object" data-id="${obj.id}">
+          <button class="icon-button" data-action="edit-object" data-id="${obj._id}">
             <span class="icon">✏️</span>
             <span class="label">Edit Object</span>
           </button>
-          <button class="icon-button warning" data-action="queue-removal" data-id="${obj.id}">
+          <button class="icon-button warning" data-action="queue-removal" data-id="${obj._id}">
             <span class="icon">📦</span>
             <span class="label">Queue Removal</span>
           </button>
-          <button class="icon-button danger" data-action="delete-object" data-id="${obj.id}">
+          <button class="icon-button danger" data-action="delete-object" data-id="${obj._id}">
             <span class="icon">🗑️</span>
             <span class="label">Delete Now</span>
           </button>
@@ -873,8 +1065,12 @@ export async function loadActiveObjSps(map, layerGroup) {
     
     map.addLayer(layerGroup);
     hideLoading('Spawned Objects', spawners.length);
+    
+    const loadTime = (performance.now() - loadStart).toFixed(2);
+    console.log(`✅ loadActiveObjSps() completed in ${loadTime}ms (${spawners.length} objects)`);
   } catch (error) {
-    console.error('Failed to load spawned objects:', error);
+    const loadTime = (performance.now() - loadStart).toFixed(2);
+    console.error(`❌ loadActiveObjSps() failed after ${loadTime}ms:`, error);
     hideLoading('Spawned Objects', 0);
   }
 }

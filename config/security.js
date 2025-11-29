@@ -37,6 +37,9 @@ const helmetConfig = helmet({
         "'self'",
         "https://unpkg.com", // Allow sourcemap downloads from Leaflet CDN
         "https:",
+        "ws://localhost:4310", // Queue API WebSocket connection
+        "wss://localhost:4310", // Queue API WebSocket secure connection
+        "http://localhost:4310", // Queue API HTTP connection
       ],
       fontSrc: [
         "'self'",

@@ -3,6 +3,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const ShopItemSchema = require('../../schemas/economy/ShopItem');
 const { requireAuthAndScope } = require('../../config/validation');
+const cache = require('../../utils/cache');
 
 // Get or create the ShopItem model
 const ShopItem = mongoose.models.ShopItem || mongoose.model('ShopItem', ShopItemSchema);
@@ -13,6 +14,14 @@ router.get('/items',
   async (req, res) => {
     try {
       const { guildId, serviceId } = req.session;
+
+      // Check cache first
+      const cacheKey = cache.generateKey('store:items', guildId, serviceId);
+      const cachedData = cache.get(cacheKey);
+      
+      if (cachedData) {
+        return res.json(cachedData);
+      }
 
       // Fetch all items for this guild/service
       const items = await ShopItem.find({
@@ -96,12 +105,17 @@ router.get('/items',
       console.log('Final channelNames mapping:', channelNames);
       console.log('=== END FETCHING CHANNEL NAMES ===\n');
 
-      res.json({
+      const responseData = {
         success: true,
         items: items,
         organized: organized,
         channelNames: channelNames
-      });
+      };
+
+      // Cache the response for 30 seconds
+      cache.set(cacheKey, responseData, 30000);
+
+      res.json(responseData);
     } catch (error) {
       console.error('Error fetching store items:', error);
       res.status(500).json({ 
@@ -296,6 +310,10 @@ router.patch('/items/:id',
         });
       }
 
+      // Invalidate cache after update
+      const cacheKey = cache.generateKey('store:items', guildId, serviceId);
+      cache.invalidate(cacheKey);
+
       res.json({
         success: true,
         item: item
@@ -423,6 +441,10 @@ router.post('/items',
       const item = new ShopItem(itemData);
       await item.save();
 
+      // Invalidate cache after create
+      const cacheKey = cache.generateKey('store:items', guildId, serviceId);
+      cache.invalidate(cacheKey);
+
       res.status(201).json({
         success: true,
         item: item,
@@ -472,6 +494,10 @@ router.delete('/items/:id',
           error: 'Item not found' 
         });
       }
+
+      // Invalidate cache after delete
+      const cacheKey = cache.generateKey('store:items', guildId, serviceId);
+      cache.invalidate(cacheKey);
 
       res.json({
         success: true,
@@ -674,9 +700,14 @@ router.patch('/items/:id/reorder',
 
       await ShopItem.bulkWrite(bulkOps);
 
+      // Invalidate cache so frontend gets updated order
+      const cacheKey = cache.generateKey('store:items', guildId, serviceId);
+      cache.invalidate(cacheKey);
+
       console.log('\n=== ITEM REORDERED ===');
       console.log(`Item ${req.params.id} reordered in category ${draggedItem.shopCategory}/${draggedItem.itemCategory}`);
       console.log(`Updated ${bulkOps.length} item display orders`);
+      console.log('Cache invalidated - frontend will get fresh data');
       console.log('NOTE: Discord bot should query with .sort({ displayOrder: 1 }) to respect this order');
       console.log('=== END REORDER ===\n');
 

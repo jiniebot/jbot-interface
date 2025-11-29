@@ -34,11 +34,25 @@ passport.use(
         const availableGuilds = userGuilds.map(guild => ({
           guildId: guild.guildid,
           guildName: `Guild ${guild.guildid}`,
-          services: guild.services.map(service => ({
-            serviceId: service.ServerInfo?.nitrado_service_id || "Unknown",
-            serviceName: service.ServerInfo?.server_name || "Unnamed Service",
-            mapLoc: Number(service.ServerInfo?.mapLoc ?? 0)
-          }))
+          services: guild.services
+            .filter(service => {
+              // Filter out inactive services at authentication time
+              const status = String(
+                service.subscriptionStatus ||
+                service.ServerInfo?.subscriptionStatus ||
+                ''
+              ).toLowerCase();
+              return status !== 'inactive';
+            })
+            .map(service => ({
+              serviceId: service.ServerInfo?.nitrado_service_id || "Unknown",
+              serviceName: service.ServerInfo?.server_name || "Unnamed Service",
+              mapLoc: Number(service.ServerInfo?.mapLoc ?? 0),
+              subscriptionStatus: service.subscriptionStatus || service.ServerInfo?.subscriptionStatus || '',
+              ServerInfo: {
+                subscriptionStatus: service.ServerInfo?.subscriptionStatus || ''
+              }
+            }))
         }));
 
         return done(null, {
